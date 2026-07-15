@@ -12,14 +12,14 @@ interface FormValues {
 }
 
 export function RegisterPage() {
-  const [pendingRegistration, setPendingRegistration] = useState<{ email: string; devCode?: string | null } | null>(null);
+  const [pendingRegistration, setPendingRegistration] = useState<{ email: string } | null>(null);
 
   const { register, handleSubmit, formState } = useForm<FormValues>();
   const reg = useRegister();
 
   const onRegister = handleSubmit((values) => {
     reg.mutate(values, {
-      onSuccess: (data) => setPendingRegistration({ email: data.email, devCode: data.devCode }),
+      onSuccess: (data) => setPendingRegistration({ email: data.email }),
     });
   });
 
@@ -28,7 +28,6 @@ export function RegisterPage() {
       <div className="mx-auto max-w-sm card p-6">
         <VerifyEmailPanel
           email={pendingRegistration.email}
-          devCode={pendingRegistration.devCode}
           onBack={() => setPendingRegistration(null)}
           backLabel="Back to registration"
         />

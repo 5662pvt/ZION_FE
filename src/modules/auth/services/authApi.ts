@@ -13,12 +13,10 @@ export interface AuthToken {
 export interface RegisterPending {
   email: string;
   requiresVerification: boolean;
-  devCode?: string | null;
 }
 
 export interface MessageResponse {
   message: string;
-  devCode?: string | null;
 }
 
 export interface MeResponse {

@@ -5,16 +5,14 @@ import { useResendVerification } from '../hooks/useResendVerification';
 
 interface Props {
   email: string;
-  devCode?: string | null;
   onBack?: () => void;
   backLabel?: string;
 }
 
-export function VerifyEmailPanel({ email, devCode, onBack, backLabel = 'Back' }: Props) {
-  const [code, setCode] = useState(devCode ?? '');
+export function VerifyEmailPanel({ email, onBack, backLabel = 'Back' }: Props) {
+  const [code, setCode] = useState('');
   const verify = useVerifyEmail();
   const resend = useResendVerification();
-  const visibleDevCode = resend.data?.devCode ?? devCode;
 
   const onVerify = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,22 +48,11 @@ export function VerifyEmailPanel({ email, devCode, onBack, backLabel = 'Back' }:
         type="button"
         className="btn-outline w-full mt-3"
         disabled={resend.isPending}
-        onClick={() =>
-          resend.mutate(email, {
-            onSuccess: (data) => {
-              if (data.devCode) setCode(data.devCode);
-            },
-          })
-        }
+        onClick={() => resend.mutate(email)}
       >
         {resend.isPending ? 'Sending…' : 'Resend code'}
       </button>
       {resend.isSuccess && <p className="text-green-700 text-sm mt-2">Code sent again.</p>}
-      {visibleDevCode && (
-        <p className="text-amber-700 text-sm mt-2">
-          Development code: <span className="font-mono font-bold tracking-widest">{visibleDevCode}</span>
-        </p>
-      )}
       <p className="text-sm text-slate-500 mt-4">
         {onBack ? (
           <button type="button" className="text-brand-700 hover:underline" onClick={onBack}>

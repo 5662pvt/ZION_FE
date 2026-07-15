@@ -7,10 +7,7 @@ export function useForgotPassword() {
   return useMutation({
     mutationFn: (email: string) => authApi.forgotPassword(email),
     onSuccess: (data, email) => {
-      navigate(`/reset-password?email=${encodeURIComponent(email)}`, {
-        replace: true,
-        state: data.devCode ? { devCode: data.devCode } : undefined,
-      });
+      navigate(`/reset-password?email=${encodeURIComponent(email)}`, { replace: true });
     },
   });
 }

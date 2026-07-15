@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PasswordInput } from '../components/PasswordInput';
 import { VerifyEmailPanel } from '../components/VerifyEmailPanel';
 import { useResetPassword } from '../hooks/useResetPassword';
@@ -11,10 +11,6 @@ interface FormValues {
   code: string;
   newPassword: string;
   confirmPassword: string;
-}
-
-interface ResetLocationState {
-  devCode?: string;
 }
 
 const passwordRules = {
@@ -30,8 +26,6 @@ const passwordRules = {
 export function ResetPasswordPage() {
   const [verifyEmail, setVerifyEmail] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const devCodeHint = (location.state as ResetLocationState | null)?.devCode;
   const defaultEmail = searchParams.get('email') ?? '';
 
   const { register, handleSubmit, formState, watch, setValue } = useForm<FormValues>({
@@ -39,10 +33,6 @@ export function ResetPasswordPage() {
   });
   const reset = useResetPassword();
   const code = watch('code');
-
-  useEffect(() => {
-    if (devCodeHint) setValue('code', devCodeHint);
-  }, [devCodeHint, setValue]);
 
   const onSubmit = handleSubmit((values) => {
     if (values.newPassword !== values.confirmPassword) return;
@@ -74,12 +64,6 @@ export function ResetPasswordPage() {
         Use the 6-digit <strong>password reset</strong> code (not the email verification code). Each request
         invalidates previous codes.
       </p>
-      {devCodeHint && (
-        <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 mb-4 text-sm text-green-900">
-          Dev reset code:{' '}
-          <span className="font-mono text-lg font-bold tracking-widest">{devCodeHint}</span>
-        </div>
-      )}
       <form className="space-y-4" onSubmit={onSubmit}>
         <div>
           <label className="block text-sm font-medium mb-1">Email</label>
