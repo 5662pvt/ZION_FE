@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ZIONShop FE
 
-## Getting Started
+Storefront & admin back-office cho **ZIONShop** — Next.js 16 (App Router) + TypeScript + antd 5 + TanStack Query.
 
-First, run the development server:
+Backend tương ứng: repo `ZION_BE` (ASP.NET Core, route `api/v1/*`, envelope `{ success, message, data, errors, pagination }`).
+
+## Môi trường
+
+Sao chép `.env.example` thành `.env.local` và chỉnh `NEXT_PUBLIC_API_URL` cho đúng backend đang chạy (mặc định `http://localhost:8080`).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Chạy dự án
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev     # http://localhost:3000
+npm run lint
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Cấu trúc
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/(shop)/` — storefront (route group, không ảnh hưởng URL)
+- `app/(auth)/` — layout đăng nhập/đăng ký (các trang sẽ thêm ở giai đoạn sau)
+- `app/admin/` — back-office, yêu cầu đăng nhập + role `Admin`/`Staff` (`AdminGuard`)
+- `services/*.service.ts` — nơi duy nhất gọi API, qua `services/apiClient.ts`
+- `hooks/use*.ts` — TanStack Query hook bọc service, page/component chỉ gọi hook
+- `types/*.ts` — DTO khớp 1-1 với backend `ZIONShop.Api`
+- `constants/roles.ts`, `constants/queryKeys.ts` — hằng số dùng chung, không hardcode chuỗi role hoặc query key rời rạc

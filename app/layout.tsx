@@ -1,30 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import Providers from "./providers";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Luyện UI Next.js",
-  description: "Project luyện tập tạo UI với Next.js",
+  title: "ZIONShop",
+  description: "ZIONShop — nền tảng thương mại điện tử",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+    <html lang="vi">
+      <body>
+        <AntdRegistry>
+          <Providers>{children}</Providers>
+        </AntdRegistry>
+      </body>
     </html>
   );
 }
