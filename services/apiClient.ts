@@ -61,9 +61,9 @@ function refreshAccessToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-async function request<T>(path: string, init: RequestInit = {}, allowRetry = true): Promise<ApiResult<T>> {
+async function request<T>(path: string, init: RequestInit = {}, allowRetry = true, isFormData = false): Promise<ApiResult<T>> {
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", "application/json");
+  if (!isFormData) headers.set("Content-Type", "application/json");
   headers.set("X-Cart-Token", getCartToken());
 
   const accessToken = getAccessToken();
@@ -78,7 +78,7 @@ async function request<T>(path: string, init: RequestInit = {}, allowRetry = tru
 
   if (res.status === 401 && allowRetry) {
     const refreshed = await refreshAccessToken();
-    if (refreshed) return request<T>(path, init, false);
+    if (refreshed) return request<T>(path, init, false, isFormData);
     clearAuthStorage();
   }
 
@@ -116,4 +116,8 @@ export function apiPut<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
 
 export function apiDelete<T>(path: string): Promise<ApiResult<T>> {
   return request<T>(path, { method: "DELETE" });
+}
+
+export function apiUpload<T>(path: string, formData: FormData): Promise<ApiResult<T>> {
+  return request<T>(path, { method: "POST", body: formData }, true, true);
 }

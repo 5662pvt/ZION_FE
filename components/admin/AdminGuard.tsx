@@ -1,27 +1,35 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Result, Spin } from "antd";
 import { useAuth } from "@/hooks/useAuth";
 import { ROLES } from "@/constants/roles";
 
-export default function AdminGuard({ children }: { children: React.ReactNode }) {
+function AdminGuardFallback() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", padding: 64 }}>
+      <Spin size="large" />
+    </div>
+  );
+}
+
+function AdminGuardInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace("/login?returnUrl=/admin");
+      const search = searchParams.toString();
+      const currentUrl = search ? `${pathname}?${search}` : pathname;
+      router.replace(`/login?returnUrl=${encodeURIComponent(currentUrl)}`);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, pathname, searchParams]);
 
   if (isLoading || !isAuthenticated) {
-    return (
-      <div style={{ display: "flex", justifyContent: "center", padding: 64 }}>
-        <Spin size="large" />
-      </div>
-    );
+    return <AdminGuardFallback />;
   }
 
   if (!hasRole(ROLES.Admin, ROLES.Staff)) {
@@ -29,4 +37,12 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   }
 
   return <>{children}</>;
+}
+
+export default function AdminGuard({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<AdminGuardFallback />}>
+      <AdminGuardInner>{children}</AdminGuardInner>
+    </Suspense>
+  );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import "@ant-design/v5-patch-for-react-19";
 import { useState, type ReactNode } from "react";
 import { ConfigProvider } from "antd";
 import viVN from "antd/locale/vi_VN";

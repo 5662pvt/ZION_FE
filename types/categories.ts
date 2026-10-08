@@ -11,6 +11,7 @@ export interface CategoryTreeNodeDto {
   id: string;
   name: string;
   slug: string;
+  description: string | null;
   displayOrder: number;
   children: CategoryTreeNodeDto[];
 }

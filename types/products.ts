@@ -42,6 +42,16 @@ export interface ProductListParams {
   sort?: string;
 }
 
+export type ProductStatus = "Draft" | "Published" | "Archived";
+
+export interface AdminProductListParams {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  categoryId?: string;
+  status?: ProductStatus;
+}
+
 export interface CreateProductImageRequest {
   url: string;
   alt?: string | null;
