@@ -1,11 +1,10 @@
 export interface AddressDto {
   id: string;
-  line1: string;
-  line2: string | null;
-  city: string;
-  state: string | null;
-  country: string;
-  postalCode: string;
+  recipientName: string;
+  phoneNumber: string;
+  province: string;
+  ward: string;
+  streetAddress: string;
   isDefault: boolean;
 }
 
@@ -26,12 +25,11 @@ export interface UpdateProfileRequest {
 }
 
 export interface AddAddressRequest {
-  line1: string;
-  line2?: string | null;
-  city: string;
-  state?: string | null;
-  country: string;
-  postalCode: string;
+  recipientName: string;
+  phoneNumber: string;
+  province: string;
+  ward: string;
+  streetAddress: string;
   isDefault: boolean;
 }
 

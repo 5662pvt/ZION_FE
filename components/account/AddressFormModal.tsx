@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Checkbox, Form, Input, Modal } from "antd";
 import { useAddAddress, useUpdateAddress } from "@/hooks/useAddresses";
+import { useProfile } from "@/hooks/useProfile";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
 import type { AddAddressRequest, AddressDto } from "@/types/users";
@@ -13,13 +14,14 @@ interface AddressFormModalProps {
   onClose: () => void;
 }
 
+const PHONE_REGEX = /^(0|\+84)(3|5|7|8|9|2)[0-9]{8}$/;
+
 const VALID_FIELDS: Array<keyof AddAddressRequest> = [
-  "line1",
-  "line2",
-  "city",
-  "state",
-  "country",
-  "postalCode",
+  "recipientName",
+  "phoneNumber",
+  "province",
+  "ward",
+  "streetAddress",
   "isDefault",
 ];
 
@@ -27,6 +29,7 @@ export default function AddressFormModal({ open, address, onClose }: AddressForm
   const [form] = Form.useForm<AddAddressRequest>();
   const addAddress = useAddAddress();
   const updateAddress = useUpdateAddress();
+  const { data: profile } = useProfile();
   const isEditing = address !== null;
   const submitting = addAddress.isPending || updateAddress.isPending;
 
@@ -35,18 +38,24 @@ export default function AddressFormModal({ open, address, onClose }: AddressForm
       form.setFieldsValue(
         address
           ? {
-              line1: address.line1,
-              line2: address.line2 ?? undefined,
-              city: address.city,
-              state: address.state ?? undefined,
-              country: address.country,
-              postalCode: address.postalCode,
+              recipientName: address.recipientName,
+              phoneNumber: address.phoneNumber,
+              province: address.province,
+              ward: address.ward,
+              streetAddress: address.streetAddress,
               isDefault: address.isDefault,
             }
-          : { line1: "", line2: "", city: "", state: "", country: "", postalCode: "", isDefault: false }
+          : {
+              recipientName: profile?.fullName ?? "",
+              phoneNumber: profile?.phoneNumber ?? "",
+              province: "",
+              ward: "",
+              streetAddress: "",
+              isDefault: false,
+            }
       );
     }
-  }, [open, address, form]);
+  }, [open, address, form, profile]);
 
   const handleOk = async () => {
     let values: AddAddressRequest;
@@ -57,12 +66,11 @@ export default function AddressFormModal({ open, address, onClose }: AddressForm
     }
 
     const body: AddAddressRequest = {
-      line1: values.line1.trim(),
-      line2: values.line2?.trim() || null,
-      city: values.city.trim(),
-      state: values.state?.trim() || null,
-      country: values.country.trim(),
-      postalCode: values.postalCode.trim(),
+      recipientName: values.recipientName.trim(),
+      phoneNumber: values.phoneNumber.replace(/[\s.-]/g, ""),
+      province: values.province.trim(),
+      ward: values.ward.trim(),
+      streetAddress: values.streetAddress.trim(),
       isDefault: values.isDefault ?? false,
     };
 
@@ -105,50 +113,63 @@ export default function AddressFormModal({ open, address, onClose }: AddressForm
     >
       <Form form={form} layout="vertical" requiredMark={false}>
         <Form.Item
-          name="line1"
-          label="Địa chỉ (dòng 1)"
+          name="recipientName"
+          label="Người nhận"
           rules={[
-            { required: true, message: "Vui lòng nhập địa chỉ" },
-            { max: 256, message: "Tối đa 256 ký tự" },
+            { required: true, message: "Vui lòng nhập tên người nhận" },
+            { max: 100, message: "Tối đa 100 ký tự" },
           ]}
         >
-          <Input placeholder="Số nhà, tên đường" />
-        </Form.Item>
-        <Form.Item name="line2" label="Địa chỉ (dòng 2)" rules={[{ max: 256, message: "Tối đa 256 ký tự" }]}>
-          <Input placeholder="Không bắt buộc" />
+          <Input placeholder="Tên người nhận" />
         </Form.Item>
         <Form.Item
-          name="city"
-          label="Thành phố"
+          name="phoneNumber"
+          label="Số điện thoại"
           rules={[
-            { required: true, message: "Vui lòng nhập thành phố" },
-            { max: 128, message: "Tối đa 128 ký tự" },
+            { required: true, message: "Vui lòng nhập số điện thoại" },
+            { max: 15, message: "Tối đa 15 ký tự" },
+            {
+              validator: (_, value) => {
+                if (!value) return Promise.resolve();
+                const stripped = String(value).replace(/[\s.-]/g, "");
+                return PHONE_REGEX.test(stripped)
+                  ? Promise.resolve()
+                  : Promise.reject(new Error("Số điện thoại không hợp lệ"));
+              },
+            },
           ]}
         >
-          <Input placeholder="Thành phố" />
-        </Form.Item>
-        <Form.Item name="state" label="Tỉnh/Bang" rules={[{ max: 128, message: "Tối đa 128 ký tự" }]}>
-          <Input placeholder="Không bắt buộc" />
-        </Form.Item>
-        <Form.Item
-          name="country"
-          label="Quốc gia"
-          rules={[
-            { required: true, message: "Vui lòng nhập quốc gia" },
-            { max: 64, message: "Tối đa 64 ký tự" },
-          ]}
-        >
-          <Input placeholder="Quốc gia" />
+          <Input placeholder="Số điện thoại" />
         </Form.Item>
         <Form.Item
-          name="postalCode"
-          label="Mã bưu chính"
+          name="province"
+          label="Tỉnh/Thành phố"
           rules={[
-            { required: true, message: "Vui lòng nhập mã bưu chính" },
-            { max: 16, message: "Tối đa 16 ký tự" },
+            { required: true, message: "Vui lòng nhập tỉnh/thành phố" },
+            { max: 100, message: "Tối đa 100 ký tự" },
           ]}
         >
-          <Input placeholder="Mã bưu chính" />
+          <Input placeholder="Tỉnh/Thành phố" />
+        </Form.Item>
+        <Form.Item
+          name="ward"
+          label="Phường/Xã"
+          rules={[
+            { required: true, message: "Vui lòng nhập phường/xã" },
+            { max: 100, message: "Tối đa 100 ký tự" },
+          ]}
+        >
+          <Input placeholder="Phường/Xã" />
+        </Form.Item>
+        <Form.Item
+          name="streetAddress"
+          label="Địa chỉ cụ thể"
+          rules={[
+            { required: true, message: "Vui lòng nhập địa chỉ cụ thể" },
+            { max: 255, message: "Tối đa 255 ký tự" },
+          ]}
+        >
+          <Input placeholder="Số nhà, tên đường, thôn/ấp…" />
         </Form.Item>
         <Form.Item name="isDefault" valuePropName="checked">
           <Checkbox>Đặt làm địa chỉ mặc định</Checkbox>

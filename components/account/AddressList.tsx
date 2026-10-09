@@ -5,6 +5,7 @@ import { Alert, Badge, Button, Card, Col, Empty, Flex, Popconfirm, Row, Spin } f
 import { useAddresses, useRemoveAddress, useSetDefaultAddress } from "@/hooks/useAddresses";
 import { toast } from "@/utils/toast";
 import { ApiError } from "@/services/apiClient";
+import { formatAddress } from "@/utils/address";
 import AddressFormModal from "./AddressFormModal";
 import type { AddressDto } from "@/types/users";
 
@@ -79,37 +80,33 @@ export default function AddressList() {
       ) : (
         <Row gutter={[16, 16]}>
           {addresses.map((address) => {
-            const card = (
-              <Card
-                actions={[
-                  <a key="edit" onClick={() => openEdit(address)}>
-                    Sửa
-                  </a>,
-                  address.isDefault ? (
-                    <span key="default" style={{ color: "#bfbfbf" }}>
-                      Đặt mặc định
-                    </span>
-                  ) : (
+            const actions = [
+              <a key="edit" onClick={() => openEdit(address)}>
+                Sửa
+              </a>,
+              ...(address.isDefault
+                ? []
+                : [
                     <a key="default" onClick={() => handleSetDefault(address.id)}>
                       Đặt mặc định
-                    </a>
-                  ),
-                  <Popconfirm
-                    key="delete"
-                    title="Xoá địa chỉ này?"
-                    okText="Xoá"
-                    cancelText="Huỷ"
-                    onConfirm={() => handleRemove(address.id)}
-                  >
-                    <a>Xoá</a>
-                  </Popconfirm>,
-                ]}
+                    </a>,
+                  ]),
+              <Popconfirm
+                key="delete"
+                title="Xoá địa chỉ này?"
+                okText="Xoá"
+                cancelText="Huỷ"
+                onConfirm={() => handleRemove(address.id)}
               >
-                <div>{address.line1}</div>
-                {address.line2 && <div>{address.line2}</div>}
+                <a>Xoá</a>
+              </Popconfirm>,
+            ];
+            const card = (
+              <Card actions={actions}>
                 <div>
-                  {[address.city, address.state, address.country].filter(Boolean).join(", ")} {address.postalCode}
+                  {address.recipientName} · {address.phoneNumber}
                 </div>
+                <div>{formatAddress(address)}</div>
               </Card>
             );
             return (
