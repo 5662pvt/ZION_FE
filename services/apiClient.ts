@@ -100,10 +100,11 @@ export function apiGet<T>(path: string): Promise<ApiResult<T>> {
   return request<T>(path, { method: "GET" });
 }
 
-export function apiPost<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
+export function apiPost<T>(path: string, body?: unknown, options?: { headers?: Record<string, string> }): Promise<ApiResult<T>> {
   return request<T>(path, {
     method: "POST",
     body: body !== undefined ? JSON.stringify(body) : undefined,
+    headers: options?.headers,
   });
 }
 

@@ -1,0 +1,69 @@
+export type OrderStatus =
+  | "PendingStock"
+  | "AwaitingPayment"
+  | "Confirmed"
+  | "Paid"
+  | "Shipped"
+  | "Completed"
+  | "Cancelled";
+
+export type PaymentMethod = "COD" | "Online";
+
+export interface ShippingAddressDto {
+  addressId: string;
+  recipientName: string;
+  phoneNumber: string;
+  province: string;
+  ward: string;
+  streetAddress: string;
+}
+
+export interface OrderLineDto {
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+}
+
+export interface OrderDto {
+  id: string;
+  code: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  currency: string;
+  createdAt: string;
+  note: string | null;
+  cancelReason: string | null;
+  shippingAddress: ShippingAddressDto;
+  lines: OrderLineDto[];
+}
+
+export interface OrderSummaryDto {
+  id: string;
+  code: string;
+  status: OrderStatus;
+  total: number;
+  currency: string;
+  createdAt: string;
+  itemCount: number;
+}
+
+export interface PlaceOrderRequest {
+  addressId: string;
+  paymentMethod: PaymentMethod;
+  note?: string;
+}
+
+export interface CancelOrderRequest {
+  reason?: string;
+}
+
+export interface MyOrdersParams {
+  page?: number;
+  pageSize?: number;
+  status?: OrderStatus;
+}

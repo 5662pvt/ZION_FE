@@ -8,7 +8,7 @@ import RequireAuth from "@/components/common/RequireAuth";
 const MENU_ITEMS = [
   { key: "/account", label: "Hồ sơ" },
   { key: "/account/addresses", label: "Sổ địa chỉ" },
-  { key: "/account/orders", label: "Đơn hàng (sắp có)", disabled: true },
+  { key: "/account/orders", label: "Đơn hàng" },
 ];
 
 export default function AccountLayout({ children }: { children: ReactNode }) {
