@@ -58,7 +58,13 @@ export default function LoginForm() {
     <>
       <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24, textAlign: "center" }}>Đăng nhập</h1>
       {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
-      <Form layout="vertical" onFinish={handleFinish} requiredMark={false} disabled={submitting}>
+      <Form
+        layout="vertical"
+        onFinish={handleFinish}
+        requiredMark={false}
+        disabled={submitting}
+        initialValues={{ email: searchParams.get("email") ?? undefined }}
+      >
         <Form.Item
           name="email"
           label="Email"

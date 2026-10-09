@@ -2,6 +2,7 @@ import type { AdminProductListParams, ProductListParams } from "@/types/products
 
 export const queryKeys = {
   me: ["me"] as const,
+  profile: ["profile"] as const,
   addresses: ["addresses"] as const,
   cart: ["cart"] as const,
   categories: {

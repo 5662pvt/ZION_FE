@@ -31,7 +31,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           {children}
-          <ToastContainer />
+          <ToastContainer position="bottom-right" />
         </AuthProvider>
       </QueryClientProvider>
     </ConfigProvider>

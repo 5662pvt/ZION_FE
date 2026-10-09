@@ -12,8 +12,17 @@ interface CategoryTreeTableProps {
   onDelete: (category: CategoryTreeNodeDto) => void;
 }
 
+type CategoryTreeTableNode = Omit<CategoryTreeNodeDto, "children"> & { children?: CategoryTreeTableNode[] };
+
+function mapTreeData(nodes: CategoryTreeNodeDto[]): CategoryTreeTableNode[] {
+  return nodes.map((node) => ({
+    ...node,
+    children: node.children.length > 0 ? mapTreeData(node.children) : undefined,
+  }));
+}
+
 export default function CategoryTreeTable({ data, loading, deletingId, onEdit, onAddChild, onDelete }: CategoryTreeTableProps) {
-  const columns: TableColumnsType<CategoryTreeNodeDto> = [
+  const columns: TableColumnsType<CategoryTreeTableNode> = [
     { title: "Tên danh mục", dataIndex: "name", key: "name" },
     { title: "Slug", dataIndex: "slug", key: "slug" },
     { title: "Thứ tự", dataIndex: "displayOrder", key: "displayOrder", width: 100 },
@@ -23,10 +32,10 @@ export default function CategoryTreeTable({ data, loading, deletingId, onEdit, o
       width: 260,
       render: (_, record) => (
         <Space>
-          <Button type="link" onClick={() => onAddChild(record)}>
+          <Button type="link" onClick={() => onAddChild(record as CategoryTreeNodeDto)}>
             Thêm danh mục con
           </Button>
-          <Button type="link" onClick={() => onEdit(record)}>
+          <Button type="link" onClick={() => onEdit(record as CategoryTreeNodeDto)}>
             Sửa
           </Button>
           <Popconfirm
@@ -34,7 +43,7 @@ export default function CategoryTreeTable({ data, loading, deletingId, onEdit, o
             description="Bạn có chắc muốn xóa danh mục này?"
             okText="Xóa"
             cancelText="Hủy"
-            onConfirm={() => onDelete(record)}
+            onConfirm={() => onDelete(record as CategoryTreeNodeDto)}
           >
             <Button type="link" danger loading={deletingId === record.id}>
               Xóa
@@ -49,7 +58,7 @@ export default function CategoryTreeTable({ data, loading, deletingId, onEdit, o
     <Table
       rowKey="id"
       columns={columns}
-      dataSource={data}
+      dataSource={mapTreeData(data)}
       loading={loading}
       pagination={false}
       locale={{ emptyText: "Chưa có danh mục nào" }}
