@@ -2,6 +2,7 @@
 
 import { InputNumber, Select, Space, TreeSelect, type TreeSelectProps } from "antd";
 import { useCategoryTree } from "@/hooks/useCategories";
+import { useIsClient } from "@/hooks/useIsClient";
 import type { CategoryTreeNodeDto } from "@/types/categories";
 
 export const SORT_OPTIONS = [
@@ -37,18 +38,23 @@ interface ProductFiltersProps {
 export default function ProductFilters({ value, onChange }: ProductFiltersProps) {
   const { data: categoryTree, isLoading: categoriesLoading } = useCategoryTree();
   const treeData = mapCategoryTree(categoryTree ?? []);
+  const isClient = useIsClient();
 
   return (
     <Space wrap>
-      <TreeSelect
-        allowClear
-        placeholder="Danh mục"
-        style={{ width: 220 }}
-        loading={categoriesLoading}
-        treeData={treeData}
-        value={value.categoryId}
-        onChange={(categoryId) => onChange({ categoryId })}
-      />
+      {isClient ? (
+        <TreeSelect
+          allowClear
+          placeholder="Danh mục"
+          style={{ width: 220 }}
+          loading={categoriesLoading}
+          treeData={treeData}
+          value={value.categoryId}
+          onChange={(categoryId) => onChange({ categoryId })}
+        />
+      ) : (
+        <Select disabled placeholder="Danh mục" style={{ width: 220 }} />
+      )}
       <InputNumber
         placeholder="Giá từ"
         min={0}

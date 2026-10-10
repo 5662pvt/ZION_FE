@@ -13,6 +13,7 @@ interface AddToCartButtonProps {
   disabled?: boolean;
   withQuantity?: boolean;
   block?: boolean;
+  max?: number;
 }
 
 export default function AddToCartButton({
@@ -20,14 +21,16 @@ export default function AddToCartButton({
   disabled = false,
   withQuantity = false,
   block = false,
+  max,
 }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
   const addToCart = useAddToCart();
+  const maxQuantity = max ?? 99;
 
   function handleAdd() {
     addToCart.mutate(
-      { productId, quantity },
+      { productId, quantity: Math.min(quantity, maxQuantity) },
       {
         onSuccess: () => {
           toast.success("Đã thêm vào giỏ · Xem giỏ", { onClick: () => router.push("/cart") });
@@ -44,9 +47,9 @@ export default function AddToCartButton({
       {withQuantity && (
         <InputNumber
           min={1}
-          max={99}
+          max={maxQuantity}
           value={quantity}
-          onChange={(value) => setQuantity(value ?? 1)}
+          onChange={(value) => setQuantity(Math.min(value ?? 1, maxQuantity))}
           disabled={disabled || addToCart.isPending}
         />
       )}

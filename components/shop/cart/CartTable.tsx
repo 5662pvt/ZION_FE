@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button, InputNumber, Popconfirm, Table, type TableProps } from "antd";
+import Link from "next/link";
+import { Button, Image, InputNumber, Popconfirm, Table, type TableProps } from "antd";
 import { formatVnd } from "@/utils/money";
 import { toast } from "@/utils/toast";
 import { useRemoveCartItem, useUpdateCartItem } from "@/hooks/useCart";
@@ -69,11 +70,25 @@ export default function CartTable({ items, loading = false }: CartTableProps) {
       title: "Ảnh",
       key: "image",
       width: 72,
-      render: () => <div style={{ width: 48, height: 48, background: "#f0f0f0" }} />,
+      render: (_, item) =>
+        item.imageUrl ? (
+          <Image
+            src={item.imageUrl}
+            alt={item.productName}
+            width={56}
+            height={56}
+            preview={false}
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <div style={{ width: 56, height: 56, background: "#f0f0f0" }} />
+        ),
     },
     {
       title: "Sản phẩm",
       dataIndex: "productName",
+      render: (name: string, item) =>
+        item.productSlug ? <Link href={`/products/${item.productSlug}`}>{name}</Link> : name,
     },
     {
       title: "Đơn giá",

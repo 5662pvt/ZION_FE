@@ -21,6 +21,20 @@ export default function AdminDashboardPage() {
             </Card>
           </Link>
         </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Link href="/admin/orders">
+            <Card hoverable title="Đơn hàng">
+              Quản lý đơn hàng và trạng thái giao hàng
+            </Card>
+          </Link>
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Link href="/admin/inventory">
+            <Card hoverable title="Tồn kho">
+              Quản lý tồn kho sản phẩm
+            </Card>
+          </Link>
+        </Col>
       </Row>
     </div>
   );

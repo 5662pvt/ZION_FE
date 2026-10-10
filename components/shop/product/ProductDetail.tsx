@@ -1,6 +1,7 @@
-import { Space, Typography } from "antd";
+import { Space, Tag, Typography } from "antd";
 import { formatVnd } from "@/utils/money";
 import AddToCartButton from "@/components/shop/AddToCartButton";
+import { useProductAvailability } from "@/hooks/useAvailability";
 import type { ProductDto } from "@/types/products";
 
 const { Title, Paragraph, Text } = Typography;
@@ -10,6 +11,10 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {
+  const { data: availability } = useProductAvailability(product.id);
+  const inStock = availability?.inStock;
+  const available = availability?.available;
+
   return (
     <div>
       <Title level={2}>{product.name}</Title>
@@ -20,8 +25,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       <Title level={3} style={{ color: "#f5222d" }}>
         {formatVnd(product.price)}
       </Title>
+      {inStock !== undefined && (
+        <div style={{ marginBottom: 16 }}>
+          {!inStock ? (
+            <Tag color="red">Hết hàng</Tag>
+          ) : available !== undefined && available <= 5 ? (
+            <Tag color="orange">Chỉ còn {available} sản phẩm</Tag>
+          ) : (
+            <Tag color="green">Còn hàng</Tag>
+          )}
+        </div>
+      )}
       {product.description && <Paragraph>{product.description}</Paragraph>}
-      <AddToCartButton productId={product.id} withQuantity />
+      <AddToCartButton productId={product.id} withQuantity disabled={inStock === false} max={available} />
     </div>
   );
 }

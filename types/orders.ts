@@ -1,3 +1,5 @@
+import type { OrderHistoryEntry } from "@/types/adminOrders";
+
 export type OrderStatus =
   | "PendingStock"
   | "AwaitingPayment"
@@ -40,6 +42,7 @@ export interface OrderDto {
   cancelReason: string | null;
   shippingAddress: ShippingAddressDto;
   lines: OrderLineDto[];
+  history: OrderHistoryEntry[];
 }
 
 export interface OrderSummaryDto {

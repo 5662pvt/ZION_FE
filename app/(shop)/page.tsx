@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Col, Flex, Input, Row, Spin, Typography } from "antd";
 import { useCategoryTree } from "@/hooks/useCategories";
 import { useProducts } from "@/hooks/useProducts";
+import { useAvailabilityBatch } from "@/hooks/useAvailability";
 import ProductCard from "@/components/shop/product/ProductCard";
 import type { CategoryTreeNodeDto } from "@/types/categories";
 
@@ -12,6 +13,7 @@ const { Title } = Typography;
 
 function NewProductsSection() {
   const { data, isLoading, isError } = useProducts({ page: 1, pageSize: 8, sort: "newest" });
+  const { data: availability } = useAvailabilityBatch(data?.items.map((product) => product.id) ?? []);
 
   return (
     <section style={{ marginBottom: 48 }}>
@@ -24,7 +26,7 @@ function NewProductsSection() {
         <Row gutter={[16, 16]}>
           {data.items.map((product) => (
             <Col key={product.id} xs={12} sm={8} md={6}>
-              <ProductCard product={product} />
+              <ProductCard product={product} inStock={availability?.[product.id]?.inStock} />
             </Col>
           ))}
         </Row>
@@ -37,6 +39,7 @@ function NewProductsSection() {
 
 function CategorySection({ category }: { category: CategoryTreeNodeDto }) {
   const { data, isLoading, isError } = useProducts({ categoryId: category.id, page: 1, pageSize: 4 });
+  const { data: availability } = useAvailabilityBatch(data?.items.map((product) => product.id) ?? []);
 
   if (!isLoading && !isError && (!data || data.items.length === 0)) return null;
 
@@ -56,7 +59,7 @@ function CategorySection({ category }: { category: CategoryTreeNodeDto }) {
         <Row gutter={[16, 16]}>
           {(data?.items ?? []).map((product) => (
             <Col key={product.id} xs={12} sm={8} md={6}>
-              <ProductCard product={product} />
+              <ProductCard product={product} inStock={availability?.[product.id]?.inStock} />
             </Col>
           ))}
         </Row>

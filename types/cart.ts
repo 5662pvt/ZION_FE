@@ -2,6 +2,8 @@ export interface CartItemDto {
   id: string;
   productId: string;
   productName: string;
+  productSlug: string | null;
+  imageUrl: string | null;
   quantity: number;
   unitPrice: number;
   subtotal: number;

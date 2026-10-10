@@ -13,8 +13,8 @@ const menuItems: MenuProps["items"] = [
   { key: "dashboard", label: <Link href="/admin">Dashboard</Link> },
   { key: "products", label: <Link href="/admin/products">Sản phẩm</Link> },
   { key: "categories", label: <Link href="/admin/categories">Danh mục</Link> },
-  { key: "orders", label: "Đơn hàng", disabled: true },
-  { key: "inventory", label: "Tồn kho", disabled: true },
+  { key: "orders", label: <Link href="/admin/orders">Đơn hàng</Link> },
+  { key: "inventory", label: <Link href="/admin/inventory">Tồn kho</Link> },
   { key: "promotions", label: "Khuyến mãi", disabled: true },
   { key: "reports", label: "Báo cáo", disabled: true },
 ];
@@ -22,6 +22,8 @@ const menuItems: MenuProps["items"] = [
 function resolveSelectedKey(pathname: string): string {
   if (pathname.startsWith("/admin/products")) return "products";
   if (pathname.startsWith("/admin/categories")) return "categories";
+  if (pathname.startsWith("/admin/orders")) return "orders";
+  if (pathname.startsWith("/admin/inventory")) return "inventory";
   return "dashboard";
 }
 

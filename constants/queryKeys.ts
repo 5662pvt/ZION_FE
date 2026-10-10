@@ -1,5 +1,7 @@
 import type { AdminProductListParams, ProductListParams } from "@/types/products";
 import type { MyOrdersParams } from "@/types/orders";
+import type { InventoryListParams, StockMovementsParams } from "@/types/inventory";
+import type { AdminOrderListParams } from "@/types/adminOrders";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -19,7 +21,17 @@ export const queryKeys = {
     mine: (params: MyOrdersParams) => ["orders", "mine", params] as const,
     detail: (id: string) => ["orders", "detail", id] as const,
   },
+  adminOrders: {
+    list: (filters: AdminOrderListParams) => ["orders", "admin", "list", filters] as const,
+  },
   payments: {
     intent: (id: string) => ["payments", "intent", id] as const,
+  },
+  inventory: {
+    list: (filters: InventoryListParams) => ["inventory", "list", filters] as const,
+    movements: (productId: string, params: StockMovementsParams) =>
+      ["inventory", "movements", productId, params] as const,
+    availability: (productId: string) => ["inventory", "availability", productId] as const,
+    availabilityBatch: (productIds: string[]) => ["inventory", "availability", "batch", productIds] as const,
   },
 };
