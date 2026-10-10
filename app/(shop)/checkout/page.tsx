@@ -8,6 +8,7 @@ import RequireAuth from "@/components/common/RequireAuth";
 import AddressSelector from "@/components/shop/checkout/AddressSelector";
 import PaymentMethodSelector from "@/components/shop/checkout/PaymentMethodSelector";
 import CheckoutSummary from "@/components/shop/checkout/CheckoutSummary";
+import type { AppliedCoupon } from "@/components/shop/checkout/CouponInput";
 import { useCart } from "@/hooks/useCart";
 import { useAddresses } from "@/hooks/useAddresses";
 import { usePlaceOrder } from "@/hooks/useOrders";
@@ -27,6 +28,7 @@ function CheckoutContent() {
   const [addressId, setAddressId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [note, setNote] = useState("");
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const prevAddressIdsRef = useRef<Set<string> | null>(null);
 
   useEffect(() => {
@@ -95,11 +97,17 @@ function CheckoutContent() {
         addressId,
         paymentMethod,
         note: note.trim() ? note.trim() : undefined,
+        couponCode: coupon?.code,
       });
       toast.success("Đặt hàng thành công");
       router.replace(`/orders/${order.id}`);
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Đặt hàng thất bại. Vui lòng thử lại.");
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+        if (err.status === 400) setCoupon(null);
+      } else {
+        toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+      }
     }
   };
 
@@ -126,7 +134,15 @@ function CheckoutContent() {
           </Card>
         </Col>
         <Col xs={24} lg={8}>
-          <CheckoutSummary cart={cart} onSubmit={handleSubmit} submitting={placeOrder.isPending} disabled={!addressId} />
+          <CheckoutSummary
+            cart={cart}
+            coupon={coupon}
+            onApplyCoupon={setCoupon}
+            onRemoveCoupon={() => setCoupon(null)}
+            onSubmit={handleSubmit}
+            submitting={placeOrder.isPending}
+            disabled={!addressId}
+          />
         </Col>
       </Row>
     </div>

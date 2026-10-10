@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, Divider, Flex, Space, Typography } from "antd";
+import CouponInput, { type AppliedCoupon } from "@/components/shop/checkout/CouponInput";
 import { formatVnd } from "@/utils/money";
 import { estimateShippingFee } from "@/utils/shipping";
 import { cartSubtotal } from "@/utils/cartTotals";
@@ -10,15 +11,27 @@ const { Text, Title } = Typography;
 
 interface CheckoutSummaryProps {
   cart: CartDto;
+  coupon: AppliedCoupon | null;
+  onApplyCoupon: (coupon: AppliedCoupon) => void;
+  onRemoveCoupon: () => void;
   onSubmit: () => void;
   submitting: boolean;
   disabled: boolean;
 }
 
-export default function CheckoutSummary({ cart, onSubmit, submitting, disabled }: CheckoutSummaryProps) {
+export default function CheckoutSummary({
+  cart,
+  coupon,
+  onApplyCoupon,
+  onRemoveCoupon,
+  onSubmit,
+  submitting,
+  disabled,
+}: CheckoutSummaryProps) {
   const subtotal = cartSubtotal(cart);
   const shippingFee = estimateShippingFee(subtotal);
-  const total = subtotal + shippingFee;
+  const discountAmount = coupon?.discountAmount ?? 0;
+  const total = subtotal - discountAmount + shippingFee;
 
   return (
     <Card title="Tóm tắt đơn hàng">
@@ -32,10 +45,18 @@ export default function CheckoutSummary({ cart, onSubmit, submitting, disabled }
           </Flex>
         ))}
         <Divider style={{ margin: "8px 0" }} />
+        <CouponInput subtotal={subtotal} applied={coupon} onApply={onApplyCoupon} onRemove={onRemoveCoupon} />
+        <Divider style={{ margin: "8px 0" }} />
         <Flex justify="space-between">
           <Text>Tạm tính</Text>
           <Text>{formatVnd(subtotal)}</Text>
         </Flex>
+        {coupon && (
+          <Flex justify="space-between">
+            <Text>Giảm giá</Text>
+            <Text type="success">−{formatVnd(discountAmount)}</Text>
+          </Flex>
+        )}
         <Flex justify="space-between">
           <Text>Phí vận chuyển (dự kiến)</Text>
           <Text>{formatVnd(shippingFee)}</Text>

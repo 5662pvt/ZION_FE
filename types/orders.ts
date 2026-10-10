@@ -40,6 +40,8 @@ export interface OrderDto {
   createdAt: string;
   note: string | null;
   cancelReason: string | null;
+  couponCode: string | null;
+  discountAmount: number;
   shippingAddress: ShippingAddressDto;
   lines: OrderLineDto[];
   history: OrderHistoryEntry[];
@@ -59,6 +61,7 @@ export interface PlaceOrderRequest {
   addressId: string;
   paymentMethod: PaymentMethod;
   note?: string;
+  couponCode?: string;
 }
 
 export interface CancelOrderRequest {

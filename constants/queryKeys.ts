@@ -2,6 +2,7 @@ import type { AdminProductListParams, ProductListParams } from "@/types/products
 import type { MyOrdersParams } from "@/types/orders";
 import type { InventoryListParams, StockMovementsParams } from "@/types/inventory";
 import type { AdminOrderListParams } from "@/types/adminOrders";
+import type { PromotionListParams } from "@/types/promotions";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -33,5 +34,9 @@ export const queryKeys = {
       ["inventory", "movements", productId, params] as const,
     availability: (productId: string) => ["inventory", "availability", productId] as const,
     availabilityBatch: (productIds: string[]) => ["inventory", "availability", "batch", productIds] as const,
+  },
+  promotions: {
+    list: (filters: PromotionListParams) => ["promotions", "list", filters] as const,
+    detail: (id: string) => ["promotions", "detail", id] as const,
   },
 };

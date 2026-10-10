@@ -101,6 +101,12 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
             <Text>Tạm tính</Text>
             <Text>{formatVnd(order.subtotal)}</Text>
           </Flex>
+          {order.discountAmount > 0 && (
+            <Flex justify="space-between">
+              <Text>Mã giảm giá {order.couponCode}</Text>
+              <Text type="success">−{formatVnd(order.discountAmount)}</Text>
+            </Flex>
+          )}
           <Flex justify="space-between">
             <Text>Phí vận chuyển</Text>
             <Text>{order.shippingFee === 0 ? "Miễn phí" : formatVnd(order.shippingFee)}</Text>

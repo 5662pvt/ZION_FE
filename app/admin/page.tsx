@@ -35,6 +35,13 @@ export default function AdminDashboardPage() {
             </Card>
           </Link>
         </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Link href="/admin/promotions">
+            <Card hoverable title="Khuyến mãi">
+              Quản lý khuyến mãi và mã giảm giá
+            </Card>
+          </Link>
+        </Col>
       </Row>
     </div>
   );
