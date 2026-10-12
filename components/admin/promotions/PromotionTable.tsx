@@ -21,12 +21,19 @@ const STATUS_LABEL: Record<PromotionStatus, string> = {
 };
 
 function formatValue(promotion: Pick<PromotionDto, "type" | "value" | "maxDiscountAmount">): string {
+  if (promotion.type === "FreeShipping") return "Miễn phí vận chuyển";
   if (promotion.type === "PercentageOff") {
     return promotion.maxDiscountAmount
       ? `${promotion.value}% (tối đa ${formatVnd(promotion.maxDiscountAmount)})`
       : `${promotion.value}%`;
   }
   return formatVnd(promotion.value);
+}
+
+function formatScope(promotion: Pick<PromotionSummaryDto, "scope" | "targetProductIds" | "targetCategoryIds">): string {
+  if (promotion.scope === "Products") return `${promotion.targetProductIds.length} sản phẩm`;
+  if (promotion.scope === "Categories") return `${promotion.targetCategoryIds.length} danh mục`;
+  return "Toàn đơn";
 }
 
 interface PromotionTableProps {
@@ -52,6 +59,11 @@ export default function PromotionTable({ items, loading, pagination, onPageChang
       title: "Đơn tối thiểu",
       dataIndex: "minOrderSubtotal",
       render: (value: number) => formatVnd(value),
+    },
+    {
+      title: "Phạm vi",
+      key: "scope",
+      render: (_, record) => formatScope(record),
     },
     {
       title: "Thời gian",

@@ -1,6 +1,7 @@
 import { Space, Tag, Typography } from "antd";
 import { formatVnd } from "@/utils/money";
 import AddToCartButton from "@/components/shop/AddToCartButton";
+import ProductReviews from "@/components/shop/reviews/ProductReviews";
 import { useProductAvailability } from "@/hooks/useAvailability";
 import type { ProductDto } from "@/types/products";
 
@@ -38,6 +39,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       )}
       {product.description && <Paragraph>{product.description}</Paragraph>}
       <AddToCartButton productId={product.id} withQuantity disabled={inStock === false} max={available} />
+      <ProductReviews productId={product.id} />
     </div>
   );
 }

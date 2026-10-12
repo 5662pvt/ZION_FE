@@ -42,6 +42,13 @@ export default function AdminDashboardPage() {
             </Card>
           </Link>
         </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Link href="/admin/reviews">
+            <Card hoverable title="Đánh giá">
+              Kiểm duyệt đánh giá sản phẩm
+            </Card>
+          </Link>
+        </Col>
       </Row>
     </div>
   );

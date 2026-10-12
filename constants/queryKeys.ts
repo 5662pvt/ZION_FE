@@ -3,6 +3,7 @@ import type { MyOrdersParams } from "@/types/orders";
 import type { InventoryListParams, StockMovementsParams } from "@/types/inventory";
 import type { AdminOrderListParams } from "@/types/adminOrders";
 import type { PromotionListParams } from "@/types/promotions";
+import type { AdminReviewListParams, ReviewListParams } from "@/types/reviews";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -38,5 +39,12 @@ export const queryKeys = {
   promotions: {
     list: (filters: PromotionListParams) => ["promotions", "list", filters] as const,
     detail: (id: string) => ["promotions", "detail", id] as const,
+  },
+  reviews: {
+    list: (productId: string, filters: ReviewListParams) => ["reviews", "list", productId, filters] as const,
+    summary: (productId: string) => ["reviews", "summary", productId] as const,
+    summaries: (productIds: string[]) => ["reviews", "summaries", productIds] as const,
+    eligibility: (productId: string) => ["reviews", "eligibility", productId] as const,
+    adminList: (filters: AdminReviewListParams) => ["reviews", "admin", "list", filters] as const,
   },
 };

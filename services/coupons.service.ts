@@ -2,13 +2,13 @@ import { apiPost } from "./apiClient";
 
 export interface ValidateCouponRequest {
   code: string;
-  subtotal: number;
 }
 
 export interface ValidateCouponResultDto {
   code: string;
   promotionName: string;
   discountAmount: number;
+  discountTarget: "Items" | "Shipping";
 }
 
 export const couponsService = {

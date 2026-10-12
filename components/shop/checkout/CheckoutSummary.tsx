@@ -45,7 +45,7 @@ export default function CheckoutSummary({
           </Flex>
         ))}
         <Divider style={{ margin: "8px 0" }} />
-        <CouponInput subtotal={subtotal} applied={coupon} onApply={onApplyCoupon} onRemove={onRemoveCoupon} />
+        <CouponInput cart={cart} applied={coupon} onApply={onApplyCoupon} onRemove={onRemoveCoupon} />
         <Divider style={{ margin: "8px 0" }} />
         <Flex justify="space-between">
           <Text>Tạm tính</Text>
@@ -53,7 +53,7 @@ export default function CheckoutSummary({
         </Flex>
         {coupon && (
           <Flex justify="space-between">
-            <Text>Giảm giá</Text>
+            <Text>{coupon.discountTarget === "Shipping" ? "Giảm phí vận chuyển" : "Giảm giá"}</Text>
             <Text type="success">−{formatVnd(discountAmount)}</Text>
           </Flex>
         )}

@@ -16,6 +16,7 @@ const menuItems: MenuProps["items"] = [
   { key: "orders", label: <Link href="/admin/orders">Đơn hàng</Link> },
   { key: "inventory", label: <Link href="/admin/inventory">Tồn kho</Link> },
   { key: "promotions", label: <Link href="/admin/promotions">Khuyến mãi</Link> },
+  { key: "reviews", label: <Link href="/admin/reviews">Đánh giá</Link> },
   { key: "reports", label: "Báo cáo", disabled: true },
 ];
 
@@ -25,6 +26,7 @@ function resolveSelectedKey(pathname: string): string {
   if (pathname.startsWith("/admin/orders")) return "orders";
   if (pathname.startsWith("/admin/inventory")) return "inventory";
   if (pathname.startsWith("/admin/promotions")) return "promotions";
+  if (pathname.startsWith("/admin/reviews")) return "reviews";
   return "dashboard";
 }
 

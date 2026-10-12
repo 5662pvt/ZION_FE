@@ -1,6 +1,7 @@
 import { Alert, Col, Empty, Pagination, Row, Spin } from "antd";
 import ProductCard from "./ProductCard";
 import { useAvailabilityBatch } from "@/hooks/useAvailability";
+import { useReviewSummaries } from "@/hooks/useReviews";
 import type { ProductSummaryDto } from "@/types/products";
 
 interface ProductGridProps {
@@ -13,6 +14,7 @@ interface ProductGridProps {
 
 export default function ProductGrid({ items, loading, isError, pagination, onPageChange }: ProductGridProps) {
   const { data: availability } = useAvailabilityBatch(items.map((item) => item.id));
+  const { data: reviewSummaries } = useReviewSummaries(items.map((item) => item.id));
 
   if (isError) {
     return <Alert type="error" message="Không tải được danh sách sản phẩm" />;
@@ -35,7 +37,12 @@ export default function ProductGrid({ items, loading, isError, pagination, onPag
       <Row gutter={[16, 16]}>
         {items.map((product) => (
           <Col key={product.id} xs={12} sm={8} md={6}>
-            <ProductCard product={product} inStock={availability?.[product.id]?.inStock} />
+            <ProductCard
+              product={product}
+              inStock={availability?.[product.id]?.inStock}
+              rating={reviewSummaries?.[product.id]?.average}
+              reviewCount={reviewSummaries?.[product.id]?.count}
+            />
           </Col>
         ))}
       </Row>

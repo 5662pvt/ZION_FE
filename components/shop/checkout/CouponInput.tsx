@@ -5,6 +5,7 @@ import { Button, Flex, Input, Space, Tag, Typography } from "antd";
 import { useValidateCoupon } from "@/hooks/useCoupon";
 import { ApiError } from "@/services/apiClient";
 import { formatVnd } from "@/utils/money";
+import type { CartDto } from "@/types/cart";
 
 const { Text } = Typography;
 
@@ -12,33 +13,45 @@ export interface AppliedCoupon {
   code: string;
   promotionName: string;
   discountAmount: number;
+  discountTarget: "Items" | "Shipping";
 }
 
 interface CouponInputProps {
-  subtotal: number;
+  cart: CartDto;
   applied: AppliedCoupon | null;
   onApply: (coupon: AppliedCoupon) => void;
   onRemove: () => void;
 }
 
-export default function CouponInput({ subtotal, applied, onApply, onRemove }: CouponInputProps) {
+export default function CouponInput({ cart, applied, onApply, onRemove }: CouponInputProps) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const validateCoupon = useValidateCoupon();
-  const prevSubtotalRef = useRef(subtotal);
+  const prevCartRef = useRef(cart);
+  const isFirstRender = useRef(true);
 
-  // Giỏ hàng đổi sau khi đã áp mã (vd đổi số lượng) - validate lại với subtotal mới
-  // thay vì giữ số tiền giảm đã lỗi thời.
+  // Giỏ hàng đổi sau khi đã áp mã (vd đổi số lượng) - validate lại theo giỏ hàng mới
+  // (BE đọc giỏ hàng của người dùng) thay vì giữ số tiền giảm đã lỗi thời.
   useEffect(() => {
-    const prevSubtotal = prevSubtotalRef.current;
-    prevSubtotalRef.current = subtotal;
-    if (!applied || subtotal === prevSubtotal) return;
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      prevCartRef.current = cart;
+      return;
+    }
+    if (cart === prevCartRef.current) return;
+    prevCartRef.current = cart;
+    if (!applied) return;
 
     validateCoupon.mutate(
-      { code: applied.code, subtotal },
+      { code: applied.code },
       {
         onSuccess: (result) => {
-          onApply({ code: result.code, promotionName: result.promotionName, discountAmount: result.discountAmount });
+          onApply({
+            code: result.code,
+            promotionName: result.promotionName,
+            discountAmount: result.discountAmount,
+            discountTarget: result.discountTarget,
+          });
         },
         onError: (err) => {
           onRemove();
@@ -49,17 +62,22 @@ export default function CouponInput({ subtotal, applied, onApply, onRemove }: Co
       }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtotal]);
+  }, [cart]);
 
   const handleApply = () => {
     const trimmed = code.trim();
     if (!trimmed) return;
     setError(null);
     validateCoupon.mutate(
-      { code: trimmed, subtotal },
+      { code: trimmed },
       {
         onSuccess: (result) => {
-          onApply({ code: result.code, promotionName: result.promotionName, discountAmount: result.discountAmount });
+          onApply({
+            code: result.code,
+            promotionName: result.promotionName,
+            discountAmount: result.discountAmount,
+            discountTarget: result.discountTarget,
+          });
           setCode("");
         },
         onError: (err) => {

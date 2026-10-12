@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs, { type Dayjs } from "dayjs";
-import { Button, DatePicker, Form, Input, InputNumber, Radio, type FormProps } from "antd";
+import { Button, DatePicker, Form, Input, InputNumber, Radio, Select, Spin, TreeSelect, type FormProps } from "antd";
+import { mapCategoryTree } from "@/components/admin/products/categoryTreeData";
 import { useCreatePromotion, useUpdatePromotion } from "@/hooks/useAdminPromotions";
+import { useCategoryTree } from "@/hooks/useCategories";
+import { productsService } from "@/services/products.service";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
-import type { PromotionDto, PromotionType, PromotionUpsertRequest } from "@/types/promotions";
+import type { PromotionDto, PromotionScope, PromotionType, PromotionUpsertRequest } from "@/types/promotions";
 
 const { RangePicker } = DatePicker;
 
@@ -21,6 +24,9 @@ interface PromotionFormValues {
   range: [Dayjs, Dayjs];
   usageLimit?: number;
   perUserLimit?: number;
+  scope: PromotionScope;
+  targetProductIds: string[];
+  targetCategoryIds: string[];
 }
 
 type MappableFieldName = keyof Omit<PromotionFormValues, "range">;
@@ -34,7 +40,14 @@ const FIELD_NAMES: MappableFieldName[] = [
   "minOrderSubtotal",
   "usageLimit",
   "perUserLimit",
+  "scope",
+  "targetProductIds",
+  "targetCategoryIds",
 ];
+
+function productLabel(product: { name: string; sku: string }): string {
+  return `${product.name} (${product.sku})`;
+}
 
 interface PromotionFormProps {
   mode: "create" | "edit";
@@ -45,8 +58,18 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
   const router = useRouter();
   const [form] = Form.useForm<PromotionFormValues>();
   const type = Form.useWatch("type", form);
+  const scope = Form.useWatch("scope", form);
+  const targetProductIdsWatch = Form.useWatch("targetProductIds", form);
   const createMutation = useCreatePromotion();
   const updateMutation = useUpdatePromotion();
+
+  const { data: categoryTree } = useCategoryTree();
+  const categoryTreeData = useMemo(() => mapCategoryTree(categoryTree ?? []), [categoryTree]);
+
+  const [productLabels, setProductLabels] = useState<Record<string, string>>({});
+  const [productKeyword, setProductKeyword] = useState("");
+  const [productSearchOptions, setProductSearchOptions] = useState<{ value: string; label: string }[]>([]);
+  const [productSearchLoading, setProductSearchLoading] = useState(false);
 
   useEffect(() => {
     if (mode === "edit" && promotion) {
@@ -60,9 +83,61 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
         range: [dayjs(promotion.startsAt), dayjs(promotion.endsAt)],
         usageLimit: promotion.usageLimit ?? undefined,
         perUserLimit: promotion.perUserLimit ?? undefined,
+        scope: promotion.scope,
+        targetProductIds: promotion.targetProductIds,
+        targetCategoryIds: promotion.targetCategoryIds,
       });
+
+      if (promotion.scope === "Products" && promotion.targetProductIds.length > 0) {
+        Promise.all(promotion.targetProductIds.map((id) => productsService.adminGetById(id)))
+          .then((products) => {
+            setProductLabels((prev) => {
+              const next = { ...prev };
+              products.forEach((p) => {
+                next[p.id] = productLabel(p);
+              });
+              return next;
+            });
+          })
+          .catch(() => {});
+      }
     }
   }, [mode, promotion, form]);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const keyword = productKeyword.trim();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!keyword) return;
+    debounceRef.current = setTimeout(() => {
+      setProductSearchLoading(true);
+      productsService
+        .adminList({ keyword, pageSize: 20 })
+        .then((result) => {
+          const options = result.items.map((p) => ({ value: p.id, label: productLabel(p) }));
+          setProductSearchOptions(options);
+          setProductLabels((prev) => {
+            const next = { ...prev };
+            options.forEach((o) => {
+              next[o.value] = o.label;
+            });
+            return next;
+          });
+        })
+        .catch(() => setProductSearchOptions([]))
+        .finally(() => setProductSearchLoading(false));
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [productKeyword]);
+
+  const productOptions = useMemo(() => {
+    const targetProductIds = targetProductIdsWatch ?? [];
+    const searchIds = productKeyword.trim() ? productSearchOptions.map((o) => o.value) : [];
+    const ids = new Set<string>([...targetProductIds, ...searchIds]);
+    return Array.from(ids).map((id) => ({ value: id, label: productLabels[id] ?? id }));
+  }, [targetProductIdsWatch, productSearchOptions, productLabels, productKeyword]);
 
   function applyFieldErrors(err: ApiError): boolean {
     if (!err.errors || err.errors.length === 0) return false;
@@ -86,17 +161,21 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
   }
 
   const handleSubmit: FormProps<PromotionFormValues>["onFinish"] = async (values) => {
+    const isFreeShipping = values.type === "FreeShipping";
     const body: PromotionUpsertRequest = {
       name: values.name.trim(),
       description: values.description?.trim() || null,
       type: values.type,
-      value: values.value,
+      value: isFreeShipping ? 0 : values.value,
       maxDiscountAmount: values.type === "PercentageOff" ? values.maxDiscountAmount ?? null : null,
       minOrderSubtotal: values.minOrderSubtotal,
       startsAt: values.range[0].toISOString(),
       endsAt: values.range[1].toISOString(),
       usageLimit: values.usageLimit ?? null,
       perUserLimit: values.perUserLimit ?? null,
+      scope: values.scope,
+      targetProductIds: values.scope === "Products" ? values.targetProductIds ?? [] : [],
+      targetCategoryIds: values.scope === "Categories" ? values.targetCategoryIds ?? [] : [],
     };
 
     try {
@@ -119,7 +198,13 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
       form={form}
       layout="vertical"
       onFinish={handleSubmit}
-      initialValues={{ type: "PercentageOff", minOrderSubtotal: 0 }}
+      initialValues={{
+        type: "PercentageOff",
+        minOrderSubtotal: 0,
+        scope: "Order",
+        targetProductIds: [],
+        targetCategoryIds: [],
+      }}
     >
       <Form.Item
         label="Tên khuyến mãi"
@@ -138,45 +223,48 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
           options={[
             { value: "PercentageOff", label: "Giảm theo %" },
             { value: "FixedAmountOff", label: "Giảm số tiền cố định" },
+            { value: "FreeShipping", label: "Miễn phí vận chuyển" },
           ]}
         />
       </Form.Item>
 
-      <div style={{ display: "flex", gap: 16 }}>
-        <Form.Item
-          label="Giá trị"
-          name="value"
-          style={{ flex: 1 }}
-          rules={[
-            { required: true, message: "Vui lòng nhập giá trị" },
-            {
-              validator: (_, value) => {
-                if (value === undefined || value === null) return Promise.resolve();
-                if (type === "PercentageOff" && (value < 1 || value > 100)) {
-                  return Promise.reject(new Error("Giá trị % phải từ 1 đến 100"));
-                }
-                if (type === "FixedAmountOff" && value <= 0) {
-                  return Promise.reject(new Error("Giá trị phải lớn hơn 0"));
-                }
-                return Promise.resolve();
-              },
-            },
-          ]}
-        >
-          <InputNumber<number> min={1} style={{ width: "100%" }} suffix={type === "PercentageOff" ? "%" : "₫"} />
-        </Form.Item>
-
-        {type === "PercentageOff" && (
+      {type !== "FreeShipping" && (
+        <div style={{ display: "flex", gap: 16 }}>
           <Form.Item
-            label="Trần giảm tối đa"
-            name="maxDiscountAmount"
+            label="Giá trị"
+            name="value"
             style={{ flex: 1 }}
-            rules={[{ type: "number", min: 0.01, message: "Phải lớn hơn 0" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập giá trị" },
+              {
+                validator: (_, value) => {
+                  if (value === undefined || value === null) return Promise.resolve();
+                  if (type === "PercentageOff" && (value < 1 || value > 100)) {
+                    return Promise.reject(new Error("Giá trị % phải từ 1 đến 100"));
+                  }
+                  if (type === "FixedAmountOff" && value <= 0) {
+                    return Promise.reject(new Error("Giá trị phải lớn hơn 0"));
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
           >
-            <InputNumber<number> min={0} step={1000} style={{ width: "100%" }} suffix="₫" placeholder="Không giới hạn" />
+            <InputNumber<number> min={1} style={{ width: "100%" }} suffix={type === "PercentageOff" ? "%" : "₫"} />
           </Form.Item>
-        )}
-      </div>
+
+          {type === "PercentageOff" && (
+            <Form.Item
+              label="Trần giảm tối đa"
+              name="maxDiscountAmount"
+              style={{ flex: 1 }}
+              rules={[{ type: "number", min: 0.01, message: "Phải lớn hơn 0" }]}
+            >
+              <InputNumber<number> min={0} step={1000} style={{ width: "100%" }} suffix="₫" placeholder="Không giới hạn" />
+            </Form.Item>
+          )}
+        </div>
+      )}
 
       <Form.Item
         label="Đơn tối thiểu"
@@ -193,6 +281,45 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
       >
         <RangePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: "100%" }} />
       </Form.Item>
+
+      <Form.Item label="Phạm vi áp dụng" name="scope" rules={[{ required: true }]}>
+        <Radio.Group
+          options={[
+            { value: "Order", label: "Toàn đơn" },
+            { value: "Products", label: "Sản phẩm" },
+            { value: "Categories", label: "Danh mục" },
+          ]}
+          onChange={() => form.setFieldsValue({ targetProductIds: [], targetCategoryIds: [] })}
+        />
+      </Form.Item>
+
+      {scope === "Products" && (
+        <Form.Item
+          label="Sản phẩm áp dụng"
+          name="targetProductIds"
+          rules={[{ required: true, type: "array", message: "Chọn ít nhất 1 sản phẩm" }]}
+        >
+          <Select
+            mode="multiple"
+            filterOption={false}
+            options={productOptions}
+            onSearch={setProductKeyword}
+            loading={productSearchLoading}
+            placeholder="Tìm sản phẩm theo tên hoặc SKU"
+            notFoundContent={productSearchLoading ? <Spin size="small" /> : null}
+          />
+        </Form.Item>
+      )}
+
+      {scope === "Categories" && (
+        <Form.Item
+          label="Danh mục áp dụng"
+          name="targetCategoryIds"
+          rules={[{ required: true, type: "array", message: "Chọn ít nhất 1 danh mục" }]}
+        >
+          <TreeSelect treeCheckable treeData={categoryTreeData} placeholder="Chọn danh mục" />
+        </Form.Item>
+      )}
 
       <div style={{ display: "flex", gap: 16 }}>
         <Form.Item label="Giới hạn lượt dùng" name="usageLimit" style={{ flex: 1 }} rules={[{ type: "number", min: 1, message: "Tối thiểu 1" }]}>

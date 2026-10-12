@@ -60,6 +60,17 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
     { title: "Đơn giá", dataIndex: "unitPrice", render: (value: number) => formatVnd(value) },
     { title: "Số lượng", dataIndex: "quantity" },
     { title: "Thành tiền", dataIndex: "lineTotal", render: (value: number) => formatVnd(value) },
+    ...(order.status === "Completed"
+      ? [
+          {
+            title: "Đánh giá",
+            key: "review",
+            render: (_: unknown, record: OrderLineDto) => (
+              <Link href={`/products/id/${record.productId}#reviews`}>Đánh giá</Link>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

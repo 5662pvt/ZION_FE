@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { Card, Image, Tag } from "antd";
+import StarRating from "@/components/shop/reviews/StarRating";
 import { formatVnd } from "@/utils/money";
 import type { ProductSummaryDto } from "@/types/products";
 
 interface ProductCardProps {
   product: ProductSummaryDto;
   inStock?: boolean;
+  rating?: number;
+  reviewCount?: number;
 }
 
-export default function ProductCard({ product, inStock }: ProductCardProps) {
+export default function ProductCard({ product, inStock, rating, reviewCount }: ProductCardProps) {
   const outOfStock = inStock === false;
 
   return (
@@ -39,7 +42,17 @@ export default function ProductCard({ product, inStock }: ProductCardProps) {
       >
         <Card.Meta
           title={product.name}
-          description={<span style={{ color: "#f5222d", fontWeight: 600 }}>{formatVnd(product.price)}</span>}
+          description={
+            <>
+              <span style={{ color: "#f5222d", fontWeight: 600 }}>{formatVnd(product.price)}</span>
+              {!!reviewCount && (
+                <div style={{ marginTop: 4 }}>
+                  <StarRating value={rating ?? 0} fontSize={12} />
+                  <span style={{ marginLeft: 4, color: "#8c8c8c" }}>({reviewCount})</span>
+                </div>
+              )}
+            </>
+          }
         />
       </Card>
     </Link>
