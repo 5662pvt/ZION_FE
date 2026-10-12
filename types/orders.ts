@@ -11,6 +11,8 @@ export type OrderStatus =
 
 export type PaymentMethod = "COD" | "Online";
 
+export type DiscountTarget = "Items" | "Shipping" | null;
+
 export interface ShippingAddressDto {
   addressId: string;
   recipientName: string;
@@ -42,6 +44,7 @@ export interface OrderDto {
   cancelReason: string | null;
   couponCode: string | null;
   discountAmount: number;
+  discountTarget: DiscountTarget;
   shippingAddress: ShippingAddressDto;
   lines: OrderLineDto[];
   history: OrderHistoryEntry[];

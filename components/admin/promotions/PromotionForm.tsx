@@ -63,7 +63,7 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
   const createMutation = useCreatePromotion();
   const updateMutation = useUpdatePromotion();
 
-  const { data: categoryTree } = useCategoryTree();
+  const { data: categoryTree, isLoading: categoryTreeLoading } = useCategoryTree();
   const categoryTreeData = useMemo(() => mapCategoryTree(categoryTree ?? []), [categoryTree]);
 
   const [productLabels, setProductLabels] = useState<Record<string, string>>({});
@@ -317,7 +317,11 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
           name="targetCategoryIds"
           rules={[{ required: true, type: "array", message: "Chọn ít nhất 1 danh mục" }]}
         >
-          <TreeSelect treeCheckable treeData={categoryTreeData} placeholder="Chọn danh mục" />
+          {categoryTreeLoading ? (
+            <Select mode="multiple" disabled loading placeholder="Đang tải danh mục…" />
+          ) : (
+            <TreeSelect treeCheckable treeData={categoryTreeData} placeholder="Chọn danh mục" />
+          )}
         </Form.Item>
       )}
 

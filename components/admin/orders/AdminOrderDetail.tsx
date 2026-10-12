@@ -103,7 +103,11 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
           </Flex>
           {order.discountAmount > 0 && (
             <Flex justify="space-between">
-              <Text>Mã giảm giá {order.couponCode}</Text>
+              <Text>
+                {order.discountTarget === "Shipping"
+                  ? `Giảm phí vận chuyển (${order.couponCode})`
+                  : `Mã giảm giá ${order.couponCode}`}
+              </Text>
               <Text type="success">−{formatVnd(order.discountAmount)}</Text>
             </Flex>
           )}
