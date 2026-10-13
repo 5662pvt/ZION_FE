@@ -20,7 +20,8 @@ const STATUS_LABEL: Record<PromotionStatus, string> = {
   Expired: "Hết hạn",
 };
 
-function formatValue(promotion: Pick<PromotionDto, "type" | "value" | "maxDiscountAmount">): string {
+function formatValue(promotion: Pick<PromotionDto, "type" | "value" | "maxDiscountAmount" | "giftItems">): string {
+  if (promotion.type === "Gift") return `Tặng ${promotion.giftItems.length} sản phẩm`;
   if (promotion.type === "FreeShipping") return "Miễn phí vận chuyển";
   if (promotion.type === "PercentageOff") {
     return promotion.maxDiscountAmount

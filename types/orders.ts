@@ -28,6 +28,7 @@ export interface OrderLineDto {
   unitPrice: number;
   quantity: number;
   lineTotal: number;
+  isGift: boolean;
 }
 
 export interface OrderDto {

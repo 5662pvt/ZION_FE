@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Alert, Button, Popconfirm, Space, Spin, Tag } from "antd";
+import { Alert, Button, Popconfirm, Space, Spin, Tag, Typography } from "antd";
 import PromotionForm from "@/components/admin/promotions/PromotionForm";
 import CouponManager from "@/components/admin/promotions/CouponManager";
 import { useActivatePromotion, useAdminPromotion, useDeactivatePromotion } from "@/hooks/useAdminPromotions";
@@ -71,8 +71,16 @@ export default function PromotionDetailPage() {
 
       <PromotionForm mode="edit" promotion={promotion} />
 
-      <h2>Mã giảm giá</h2>
-      <CouponManager promotionId={promotion.id} coupons={promotion.coupons} />
+      {promotion.type === "Gift" ? (
+        <Typography.Text type="secondary">
+          Khuyến mãi quà tặng tự áp dụng, không dùng mã.
+        </Typography.Text>
+      ) : (
+        <>
+          <h2>Mã giảm giá</h2>
+          <CouponManager promotionId={promotion.id} coupons={promotion.coupons} />
+        </>
+      )}
     </div>
   );
 }

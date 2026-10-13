@@ -1,4 +1,4 @@
-export type PromotionType = "PercentageOff" | "FixedAmountOff" | "FreeShipping";
+export type PromotionType = "PercentageOff" | "FixedAmountOff" | "FreeShipping" | "Gift";
 
 export type PromotionStatus = "Active" | "Inactive" | "Scheduled" | "Expired";
 
@@ -10,6 +10,11 @@ export interface CouponDto {
   isActive: boolean;
   usedCount: number;
   createdAt: string;
+}
+
+export interface GiftItemDto {
+  productId: string;
+  quantity: number;
 }
 
 export interface PromotionSummaryDto {
@@ -30,6 +35,8 @@ export interface PromotionSummaryDto {
   scope: PromotionScope;
   targetProductIds: string[];
   targetCategoryIds: string[];
+  minQuantity: number | null;
+  giftItems: GiftItemDto[];
 }
 
 export interface PromotionDto extends PromotionSummaryDto {
@@ -58,6 +65,8 @@ export interface PromotionUpsertRequest {
   scope: PromotionScope;
   targetProductIds: string[];
   targetCategoryIds: string[];
+  minQuantity: number | null;
+  giftItems: GiftItemDto[];
 }
 
 export interface AddCouponRequest {

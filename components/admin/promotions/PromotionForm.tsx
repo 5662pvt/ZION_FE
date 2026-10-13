@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import dayjs, { type Dayjs } from "dayjs";
-import { Button, DatePicker, Form, Input, InputNumber, Radio, Select, Spin, TreeSelect, type FormProps } from "antd";
+import { Button, DatePicker, Form, Input, InputNumber, Radio, Select, Space, Spin, TreeSelect, type FormProps } from "antd";
 import { mapCategoryTree } from "@/components/admin/products/categoryTreeData";
 import { useCreatePromotion, useUpdatePromotion } from "@/hooks/useAdminPromotions";
 import { useCategoryTree } from "@/hooks/useCategories";
@@ -13,6 +13,11 @@ import { toast } from "@/utils/toast";
 import type { PromotionDto, PromotionScope, PromotionType, PromotionUpsertRequest } from "@/types/promotions";
 
 const { RangePicker } = DatePicker;
+
+interface GiftItemFormValue {
+  productId: string;
+  quantity: number;
+}
 
 interface PromotionFormValues {
   name: string;
@@ -27,9 +32,11 @@ interface PromotionFormValues {
   scope: PromotionScope;
   targetProductIds: string[];
   targetCategoryIds: string[];
+  minQuantity?: number | null;
+  giftItems: GiftItemFormValue[];
 }
 
-type MappableFieldName = keyof Omit<PromotionFormValues, "range">;
+type MappableFieldName = keyof Omit<PromotionFormValues, "range" | "giftItems">;
 
 const FIELD_NAMES: MappableFieldName[] = [
   "name",
@@ -43,6 +50,7 @@ const FIELD_NAMES: MappableFieldName[] = [
   "scope",
   "targetProductIds",
   "targetCategoryIds",
+  "minQuantity",
 ];
 
 function productLabel(product: { name: string; sku: string }): string {
@@ -60,6 +68,7 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
   const type = Form.useWatch("type", form);
   const scope = Form.useWatch("scope", form);
   const targetProductIdsWatch = Form.useWatch("targetProductIds", form);
+  const giftItemsWatch = Form.useWatch("giftItems", form);
   const createMutation = useCreatePromotion();
   const updateMutation = useUpdatePromotion();
 
@@ -86,10 +95,16 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
         scope: promotion.scope,
         targetProductIds: promotion.targetProductIds,
         targetCategoryIds: promotion.targetCategoryIds,
+        minQuantity: promotion.minQuantity ?? undefined,
+        giftItems: promotion.giftItems,
       });
 
-      if (promotion.scope === "Products" && promotion.targetProductIds.length > 0) {
-        Promise.all(promotion.targetProductIds.map((id) => productsService.adminGetById(id)))
+      const idsToLoad = new Set<string>();
+      if (promotion.scope === "Products") promotion.targetProductIds.forEach((id) => idsToLoad.add(id));
+      promotion.giftItems.forEach((g) => idsToLoad.add(g.productId));
+
+      if (idsToLoad.size > 0) {
+        Promise.all(Array.from(idsToLoad).map((id) => productsService.adminGetById(id)))
           .then((products) => {
             setProductLabels((prev) => {
               const next = { ...prev };
@@ -134,10 +149,13 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
 
   const productOptions = useMemo(() => {
     const targetProductIds = targetProductIdsWatch ?? [];
+    const giftProductIds = (giftItemsWatch ?? [])
+      .map((g) => g?.productId)
+      .filter((id): id is string => !!id);
     const searchIds = productKeyword.trim() ? productSearchOptions.map((o) => o.value) : [];
-    const ids = new Set<string>([...targetProductIds, ...searchIds]);
+    const ids = new Set<string>([...targetProductIds, ...giftProductIds, ...searchIds]);
     return Array.from(ids).map((id) => ({ value: id, label: productLabels[id] ?? id }));
-  }, [targetProductIdsWatch, productSearchOptions, productLabels, productKeyword]);
+  }, [targetProductIdsWatch, giftItemsWatch, productSearchOptions, productLabels, productKeyword]);
 
   function applyFieldErrors(err: ApiError): boolean {
     if (!err.errors || err.errors.length === 0) return false;
@@ -162,11 +180,12 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
 
   const handleSubmit: FormProps<PromotionFormValues>["onFinish"] = async (values) => {
     const isFreeShipping = values.type === "FreeShipping";
+    const isGift = values.type === "Gift";
     const body: PromotionUpsertRequest = {
       name: values.name.trim(),
       description: values.description?.trim() || null,
       type: values.type,
-      value: isFreeShipping ? 0 : values.value,
+      value: isFreeShipping || isGift ? 0 : values.value,
       maxDiscountAmount: values.type === "PercentageOff" ? values.maxDiscountAmount ?? null : null,
       minOrderSubtotal: values.minOrderSubtotal,
       startsAt: values.range[0].toISOString(),
@@ -176,6 +195,10 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
       scope: values.scope,
       targetProductIds: values.scope === "Products" ? values.targetProductIds ?? [] : [],
       targetCategoryIds: values.scope === "Categories" ? values.targetCategoryIds ?? [] : [],
+      minQuantity: isGift && values.scope !== "Order" ? values.minQuantity ?? null : null,
+      giftItems: isGift
+        ? (values.giftItems ?? []).map((g) => ({ productId: g.productId, quantity: g.quantity }))
+        : [],
     };
 
     try {
@@ -204,6 +227,7 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
         scope: "Order",
         targetProductIds: [],
         targetCategoryIds: [],
+        giftItems: [],
       }}
     >
       <Form.Item
@@ -224,11 +248,12 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
             { value: "PercentageOff", label: "Giảm theo %" },
             { value: "FixedAmountOff", label: "Giảm số tiền cố định" },
             { value: "FreeShipping", label: "Miễn phí vận chuyển" },
+            { value: "Gift", label: "Quà tặng" },
           ]}
         />
       </Form.Item>
 
-      {type !== "FreeShipping" && (
+      {type !== "FreeShipping" && type !== "Gift" && (
         <div style={{ display: "flex", gap: 16 }}>
           <Form.Item
             label="Giá trị"
@@ -269,7 +294,17 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
       <Form.Item
         label="Đơn tối thiểu"
         name="minOrderSubtotal"
-        rules={[{ required: true, message: "Vui lòng nhập đơn tối thiểu" }]}
+        rules={[
+          { required: true, message: "Vui lòng nhập đơn tối thiểu" },
+          {
+            validator: (_, value) => {
+              if (type === "Gift" && scope === "Order" && !(value > 0)) {
+                return Promise.reject(new Error("Đơn tối thiểu phải lớn hơn 0 khi áp dụng toàn đơn"));
+              }
+              return Promise.resolve();
+            },
+          },
+        ]}
       >
         <InputNumber<number> min={0} step={1000} style={{ width: "100%" }} suffix="₫" />
       </Form.Item>
@@ -289,9 +324,22 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
             { value: "Products", label: "Sản phẩm" },
             { value: "Categories", label: "Danh mục" },
           ]}
-          onChange={() => form.setFieldsValue({ targetProductIds: [], targetCategoryIds: [] })}
+          onChange={() => form.setFieldsValue({ targetProductIds: [], targetCategoryIds: [], minQuantity: null })}
         />
       </Form.Item>
+
+      {type === "Gift" && scope !== "Order" && (
+        <Form.Item
+          label="Số lượng mua tối thiểu"
+          name="minQuantity"
+          rules={[
+            { required: true, message: "Vui lòng nhập số lượng mua tối thiểu" },
+            { type: "number", min: 1, message: "Tối thiểu 1" },
+          ]}
+        >
+          <InputNumber<number> min={1} style={{ width: "100%" }} />
+        </Form.Item>
+      )}
 
       {scope === "Products" && (
         <Form.Item
@@ -323,6 +371,70 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
             <TreeSelect treeCheckable treeData={categoryTreeData} placeholder="Chọn danh mục" />
           )}
         </Form.Item>
+      )}
+
+      {type === "Gift" && (
+        <Form.List
+          name="giftItems"
+          rules={[
+            {
+              validator: async (_, items: GiftItemFormValue[] = []) => {
+                if (items.length === 0) return Promise.reject(new Error("Thêm ít nhất 1 sản phẩm tặng"));
+                if (items.length > 5) return Promise.reject(new Error("Tối đa 5 sản phẩm tặng"));
+                const ids = items.map((i) => i?.productId).filter(Boolean);
+                if (new Set(ids).size !== ids.length) {
+                  return Promise.reject(new Error("Sản phẩm tặng không được trùng"));
+                }
+              },
+            },
+          ]}
+        >
+          {(fields, { add, remove }, { errors }) => (
+            <Form.Item label="Sản phẩm tặng" required>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Space key={key} align="baseline" style={{ width: "100%" }}>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "productId"]}
+                      rules={[{ required: true, message: "Chọn sản phẩm" }]}
+                      style={{ flex: 1, marginBottom: 0 }}
+                    >
+                      <Select
+                        showSearch
+                        filterOption={false}
+                        options={productOptions}
+                        onSearch={setProductKeyword}
+                        loading={productSearchLoading}
+                        placeholder="Tìm sản phẩm theo tên hoặc SKU"
+                        notFoundContent={productSearchLoading ? <Spin size="small" /> : null}
+                        style={{ minWidth: 280 }}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "quantity"]}
+                      rules={[{ required: true, message: "Nhập số lượng" }]}
+                      initialValue={1}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <InputNumber<number> min={1} max={10} placeholder="SL" />
+                    </Form.Item>
+                    <Button danger onClick={() => remove(name)}>
+                      Xoá
+                    </Button>
+                  </Space>
+                ))}
+                {fields.length < 5 && (
+                  <Button type="dashed" onClick={() => add({ quantity: 1 })} block>
+                    + Thêm sản phẩm tặng
+                  </Button>
+                )}
+                <Form.ErrorList errors={errors} />
+              </Space>
+            </Form.Item>
+          )}
+        </Form.List>
       )}
 
       <div style={{ display: "flex", gap: 16 }}>

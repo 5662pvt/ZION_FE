@@ -40,6 +40,9 @@ export const queryKeys = {
     list: (filters: PromotionListParams) => ["promotions", "list", filters] as const,
     detail: (id: string) => ["promotions", "detail", id] as const,
   },
+  gifts: {
+    preview: (signature: string) => ["gifts", "preview", signature] as const,
+  },
   reviews: {
     list: (productId: string, filters: ReviewListParams) => ["reviews", "list", productId, filters] as const,
     summary: (productId: string) => ["reviews", "summary", productId] as const,

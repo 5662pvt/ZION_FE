@@ -48,10 +48,27 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
   }
 
   const lineColumns: TableProps<OrderLineDto>["columns"] = [
-    { title: "Sản phẩm", dataIndex: "productName" },
-    { title: "Đơn giá", dataIndex: "unitPrice", render: (value: number) => formatVnd(value) },
+    {
+      title: "Sản phẩm",
+      dataIndex: "productName",
+      render: (name: string, record) => (
+        <Space size={6}>
+          <span>{name}</span>
+          {record.isGift && <Tag color="gold">Quà tặng</Tag>}
+        </Space>
+      ),
+    },
+    {
+      title: "Đơn giá",
+      dataIndex: "unitPrice",
+      render: (value: number, record) => (record.isGift ? "Miễn phí" : formatVnd(value)),
+    },
     { title: "Số lượng", dataIndex: "quantity" },
-    { title: "Thành tiền", dataIndex: "lineTotal", render: (value: number) => formatVnd(value) },
+    {
+      title: "Thành tiền",
+      dataIndex: "lineTotal",
+      render: (value: number, record) => (record.isGift ? "Miễn phí" : formatVnd(value)),
+    },
   ];
 
   return (

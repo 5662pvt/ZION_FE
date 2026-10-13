@@ -2,6 +2,7 @@
 
 import { Button, Card, Divider, Flex, Space, Typography } from "antd";
 import CouponInput, { type AppliedCoupon } from "@/components/shop/checkout/CouponInput";
+import GiftPreview from "@/components/shop/gifts/GiftPreview";
 import { formatVnd } from "@/utils/money";
 import { estimateShippingFee } from "@/utils/shipping";
 import { cartSubtotal } from "@/utils/cartTotals";
@@ -44,6 +45,7 @@ export default function CheckoutSummary({
             <Text>{formatVnd(item.subtotal)}</Text>
           </Flex>
         ))}
+        <GiftPreview />
         <Divider style={{ margin: "8px 0" }} />
         <CouponInput cart={cart} applied={coupon} onApply={onApplyCoupon} onRemove={onRemoveCoupon} />
         <Divider style={{ margin: "8px 0" }} />
