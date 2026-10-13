@@ -4,6 +4,7 @@ import type { InventoryListParams, StockMovementsParams } from "@/types/inventor
 import type { AdminOrderListParams } from "@/types/adminOrders";
 import type { PromotionListParams } from "@/types/promotions";
 import type { AdminReviewListParams, ReviewListParams } from "@/types/reviews";
+import type { ReportDateRangeParams, TopCategoriesParams, TopProductsParams } from "@/types/reports";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -49,5 +50,11 @@ export const queryKeys = {
     summaries: (productIds: string[]) => ["reviews", "summaries", productIds] as const,
     eligibility: (productId: string) => ["reviews", "eligibility", productId] as const,
     adminList: (filters: AdminReviewListParams) => ["reviews", "admin", "list", filters] as const,
+  },
+  reports: {
+    dashboard: (params: ReportDateRangeParams) => ["reports", "dashboard", params] as const,
+    topProducts: (params: TopProductsParams) => ["reports", "topProducts", params] as const,
+    topCategories: (params: TopCategoriesParams) => ["reports", "topCategories", params] as const,
+    promotions: (params: ReportDateRangeParams) => ["reports", "promotions", params] as const,
   },
 };

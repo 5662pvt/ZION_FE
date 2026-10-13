@@ -6,19 +6,9 @@ import { usePathname } from "next/navigation";
 import { Button, Layout, Menu, Space, type MenuProps } from "antd";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { useAuth } from "@/hooks/useAuth";
+import { ROLES } from "@/constants/roles";
 
 const { Header, Sider, Content } = Layout;
-
-const menuItems: MenuProps["items"] = [
-  { key: "dashboard", label: <Link href="/admin">Dashboard</Link> },
-  { key: "products", label: <Link href="/admin/products">Sản phẩm</Link> },
-  { key: "categories", label: <Link href="/admin/categories">Danh mục</Link> },
-  { key: "orders", label: <Link href="/admin/orders">Đơn hàng</Link> },
-  { key: "inventory", label: <Link href="/admin/inventory">Tồn kho</Link> },
-  { key: "promotions", label: <Link href="/admin/promotions">Khuyến mãi</Link> },
-  { key: "reviews", label: <Link href="/admin/reviews">Đánh giá</Link> },
-  { key: "reports", label: "Báo cáo", disabled: true },
-];
 
 function resolveSelectedKey(pathname: string): string {
   if (pathname.startsWith("/admin/products")) return "products";
@@ -27,13 +17,31 @@ function resolveSelectedKey(pathname: string): string {
   if (pathname.startsWith("/admin/inventory")) return "inventory";
   if (pathname.startsWith("/admin/promotions")) return "promotions";
   if (pathname.startsWith("/admin/reviews")) return "reviews";
+  if (pathname.startsWith("/admin/reports")) return "reports";
   return "dashboard";
 }
 
 function AdminShell({ children }: { children: ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const pathname = usePathname();
   const selectedKey = useMemo(() => resolveSelectedKey(pathname), [pathname]);
+  const isAdmin = hasRole(ROLES.Admin);
+
+  const menuItems: MenuProps["items"] = useMemo(
+    () => [
+      { key: "dashboard", label: <Link href="/admin">Dashboard</Link> },
+      { key: "products", label: <Link href="/admin/products">Sản phẩm</Link> },
+      { key: "categories", label: <Link href="/admin/categories">Danh mục</Link> },
+      { key: "orders", label: <Link href="/admin/orders">Đơn hàng</Link> },
+      { key: "inventory", label: <Link href="/admin/inventory">Tồn kho</Link> },
+      { key: "promotions", label: <Link href="/admin/promotions">Khuyến mãi</Link> },
+      { key: "reviews", label: <Link href="/admin/reviews">Đánh giá</Link> },
+      isAdmin
+        ? { key: "reports", label: <Link href="/admin/reports">Báo cáo</Link> }
+        : { key: "reports", label: "Báo cáo", disabled: true },
+    ],
+    [isAdmin]
+  );
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
