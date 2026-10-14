@@ -124,7 +124,11 @@ function CheckoutContent() {
     try {
       const order = await placeOrder.mutateAsync({ body, idempotencyKey });
       idempotencyRef.current = null;
-      toast.success("Đặt hàng thành công");
+      if (order.status === "Cancelled") {
+        toast.warning("Đơn hàng này đã bị huỷ: " + (order.cancelReason ?? ""));
+      } else {
+        toast.success("Đặt hàng thành công");
+      }
       router.replace(`/orders/${order.id}`);
     } catch (err) {
       if (!(err instanceof ApiError)) {
@@ -143,6 +147,11 @@ function CheckoutContent() {
       if (code === "Orders.IdempotencyKeyReused") {
         idempotencyRef.current = null;
         toast.warning("Thông tin đơn đã thay đổi, vui lòng bấm Đặt hàng lại.");
+        return;
+      }
+
+      if (code === "Orders.IdempotencyKeyInProgress") {
+        toast.info("Đơn hàng đang được xử lý, vui lòng đợi giây lát rồi thử lại.");
         return;
       }
 
