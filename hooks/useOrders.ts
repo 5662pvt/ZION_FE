@@ -63,7 +63,8 @@ export function useOrderPolling(id: string, status: string | undefined, refetch:
 export function usePlaceOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: PlaceOrderRequest) => ordersService.placeOrder(body),
+    mutationFn: ({ body, idempotencyKey }: { body: PlaceOrderRequest; idempotencyKey?: string }) =>
+      ordersService.placeOrder(body, idempotencyKey),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: ["orders", "mine"] });

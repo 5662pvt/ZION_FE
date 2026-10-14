@@ -13,7 +13,12 @@ function buildMyOrdersQuery(params: MyOrdersParams): string {
 }
 
 export const ordersService = {
-  placeOrder: (body: PlaceOrderRequest) => apiPost<OrderDto>("/api/v1/orders", body).then((r) => r.data),
+  placeOrder: (body: PlaceOrderRequest, idempotencyKey?: string) =>
+    apiPost<OrderDto>(
+      "/api/v1/orders",
+      body,
+      idempotencyKey ? { headers: { "Idempotency-Key": idempotencyKey } } : undefined
+    ).then((r) => r.data),
 
   getMyOrders: async (params: MyOrdersParams = {}): Promise<Paged<OrderSummaryDto>> => {
     const { data, pagination } = await apiGet<OrderSummaryDto[]>(`/api/v1/orders/mine${buildMyOrdersQuery(params)}`);
