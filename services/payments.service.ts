@@ -1,11 +1,11 @@
 import { apiGet, apiPost } from "./apiClient";
-import type { PaymentIntentDto, SimulatePaymentRequest } from "@/types/payments";
+import type { PaymentChannel, PaymentIntentDto, SimulatePaymentRequest } from "@/types/payments";
 
 export const paymentsService = {
-  createIntent: (orderId: string, idempotencyKey: string) =>
+  createIntent: (orderId: string, idempotencyKey: string, channel?: PaymentChannel) =>
     apiPost<PaymentIntentDto>(
       "/api/v1/payments/intents",
-      { orderId },
+      channel ? { orderId, channel } : { orderId },
       { headers: { "Idempotency-Key": idempotencyKey } }
     ).then((r) => r.data),
 

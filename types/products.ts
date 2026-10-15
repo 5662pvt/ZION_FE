@@ -32,6 +32,16 @@ export interface ProductSummaryDto {
   primaryImageUrl: string | null;
 }
 
+export interface ProductSuggestionDto {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string;
+  price: number;
+  currency: string;
+  thumbnailUrl: string | null;
+}
+
 export interface ProductListParams {
   page?: number;
   pageSize?: number;

@@ -19,8 +19,8 @@ export default function AdminOrderTimeline({ history }: AdminOrderTimelineProps)
         children: (
           <div>
             <div>{orderStatusLabel(entry.status)}</div>
-            <div style={{ fontSize: 12, color: "#888" }}>{dayjs(entry.at).format("DD/MM/YYYY HH:mm")}</div>
-            {entry.note && <div style={{ fontSize: 12, color: "#888" }}>{entry.note}</div>}
+            <div style={{ fontSize: 12, color: "var(--color-muted)" }}>{dayjs(entry.at).format("DD/MM/YYYY HH:mm")}</div>
+            {entry.note && <div style={{ fontSize: 12, color: "var(--color-muted)" }}>{entry.note}</div>}
           </div>
         ),
       }))}

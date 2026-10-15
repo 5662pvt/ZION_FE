@@ -6,6 +6,7 @@ import type {
   ProductDto,
   ProductImageDto,
   ProductListParams,
+  ProductSuggestionDto,
   ProductSummaryDto,
   UpdateProductRequest,
 } from "@/types/products";
@@ -45,6 +46,11 @@ export const productsService = {
   getById: (id: string) => apiGet<ProductDto>(`/api/v1/products/${id}`).then((r) => r.data),
 
   getBySlug: (slug: string) => apiGet<ProductDto>(`/api/v1/products/by-slug/${slug}`).then((r) => r.data),
+
+  suggest: (q: string, limit = 8) =>
+    apiGet<ProductSuggestionDto[]>(`/api/v1/products/suggest?q=${encodeURIComponent(q)}&limit=${limit}`).then(
+      (r) => r.data
+    ),
 
   adminGetById: (id: string) => apiGet<ProductDto>(`/api/v1/products/admin/${id}`).then((r) => r.data),
 

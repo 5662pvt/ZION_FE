@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
-import { Table, Tag, type TableProps } from "antd";
+import { Button, type TableProps } from "antd";
 import { formatVnd } from "@/utils/money";
-import { orderStatusColor, orderStatusLabel, paymentMethodLabel } from "@/utils/orderStatus";
+import { paymentMethodLabel } from "@/utils/orderStatus";
+import { OrderStatusBadge } from "@/components/ui/StatusBadge";
+import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
+import ListCard from "@/components/admin/common/ListCard";
 import type { AdminOrderSummaryDto } from "@/types/adminOrders";
 
 interface AdminOrderTableProps {
@@ -15,6 +19,7 @@ interface AdminOrderTableProps {
 }
 
 export default function AdminOrderTable({ items, loading, pagination, onPageChange }: AdminOrderTableProps) {
+  const router = useRouter();
   const columns: TableProps<AdminOrderSummaryDto>["columns"] = [
     {
       title: "Mã đơn",
@@ -42,24 +47,37 @@ export default function AdminOrderTable({ items, loading, pagination, onPageChan
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (status: AdminOrderSummaryDto["status"]) => <Tag color={orderStatusColor(status)}>{orderStatusLabel(status)}</Tag>,
+      render: (status: AdminOrderSummaryDto["status"]) => <OrderStatusBadge status={status} />,
     },
   ];
 
   return (
-    <Table<AdminOrderSummaryDto>
+    <ResponsiveTable<AdminOrderSummaryDto>
       rowKey="id"
       loading={loading}
       dataSource={items}
       columns={columns}
-      locale={{ emptyText: "Chưa có đơn hàng" }}
-      pagination={{
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        total: pagination.total,
-        showSizeChanger: true,
-        onChange: onPageChange,
-      }}
+      emptyText="Chưa có đơn hàng"
+      pagination={pagination}
+      onPageChange={onPageChange}
+      renderCard={(record) => (
+        <ListCard
+          title={record.code}
+          status={<OrderStatusBadge status={record.status} />}
+          fields={[
+            { label: "Ngày đặt", value: dayjs(record.createdAt).format("DD/MM/YYYY HH:mm") },
+            { label: "Người nhận", value: `${record.recipientName} · ${record.phoneNumber}` },
+            { label: "Số SP", value: record.itemCount },
+            { label: "Tổng tiền", value: formatVnd(record.total) },
+            { label: "PTTT", value: paymentMethodLabel(record.paymentMethod) },
+          ]}
+          action={
+            <Button size="small" type="primary" onClick={() => router.push(`/admin/orders/${record.id}`)}>
+              Xem chi tiết
+            </Button>
+          }
+        />
+      )}
     />
   );
 }

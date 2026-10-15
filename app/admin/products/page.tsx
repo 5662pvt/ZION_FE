@@ -3,11 +3,14 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Alert, Button, Input, Select, Space, Spin, TreeSelect } from "antd";
+import { Button, Input, Select, Spin, TreeSelect } from "antd";
 import ProductTable from "@/components/admin/products/ProductTable";
 import { mapCategoryTree } from "@/components/admin/products/categoryTreeData";
 import { useAdminProducts } from "@/hooks/useAdminProducts";
 import { useCategoryTree } from "@/hooks/useCategories";
+import PageHeader from "@/components/ui/PageHeader";
+import ErrorState from "@/components/ui/ErrorState";
+import FilterBar from "@/components/admin/common/FilterBar";
 import type { AdminProductListParams, ProductStatus } from "@/types/products";
 
 const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
@@ -28,7 +31,7 @@ function ProductsPageContent() {
   const status = (searchParams.get("status") as ProductStatus | null) ?? undefined;
 
   const params: AdminProductListParams = { page, pageSize, keyword, categoryId, status };
-  const { data, isLoading, isError } = useAdminProducts(params);
+  const { data, isLoading, isError, refetch } = useAdminProducts(params);
   const { data: categoryTree } = useCategoryTree();
   const treeData = mapCategoryTree(categoryTree ?? []);
 
@@ -44,39 +47,44 @@ function ProductsPageContent() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, width: "100%", justifyContent: "space-between" }} wrap>
-        <Space wrap>
-          <Input.Search
-            allowClear
-            placeholder="Tìm theo tên, SKU"
-            defaultValue={keyword}
-            onSearch={(value) => updateParams({ keyword: value || undefined })}
-            style={{ width: 240 }}
-          />
-          <Select<ProductStatus | undefined>
-            allowClear
-            placeholder="Trạng thái"
-            style={{ width: 160 }}
-            value={status}
-            options={STATUS_OPTIONS}
-            onChange={(value) => updateParams({ status: value })}
-          />
-          <TreeSelect
-            allowClear
-            placeholder="Danh mục"
-            style={{ width: 220 }}
-            treeData={treeData}
-            value={categoryId}
-            onChange={(value) => updateParams({ categoryId: value })}
-          />
-        </Space>
-        <Link href="/admin/products/new">
-          <Button type="primary">Thêm sản phẩm</Button>
-        </Link>
-      </Space>
+      <PageHeader
+        title="Sản phẩm"
+        description="Quản lý danh sách sản phẩm trong cửa hàng"
+        action={
+          <Link href="/admin/products/new">
+            <Button type="primary">Thêm sản phẩm</Button>
+          </Link>
+        }
+      />
+
+      <FilterBar>
+        <Input.Search
+          allowClear
+          placeholder="Tìm theo tên, SKU"
+          defaultValue={keyword}
+          onSearch={(value) => updateParams({ keyword: value || undefined })}
+          style={{ width: 240 }}
+        />
+        <Select<ProductStatus | undefined>
+          allowClear
+          placeholder="Trạng thái"
+          style={{ width: 160 }}
+          value={status}
+          options={STATUS_OPTIONS}
+          onChange={(value) => updateParams({ status: value })}
+        />
+        <TreeSelect
+          allowClear
+          placeholder="Danh mục"
+          style={{ width: 220 }}
+          treeData={treeData}
+          value={categoryId}
+          onChange={(value) => updateParams({ categoryId: value })}
+        />
+      </FilterBar>
 
       {isError ? (
-        <Alert type="error" message="Không tải được danh sách sản phẩm" />
+        <ErrorState message="Không tải được danh sách sản phẩm" onRetry={() => void refetch()} />
       ) : (
         <ProductTable
           items={data?.items ?? []}

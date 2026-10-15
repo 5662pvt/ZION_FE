@@ -2,11 +2,14 @@
 
 import { Suspense, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Alert, Input, Space, Spin, Switch } from "antd";
+import { Input, Space, Spin, Switch } from "antd";
 import InventoryTable from "@/components/admin/inventory/InventoryTable";
 import AdjustStockModal from "@/components/admin/inventory/AdjustStockModal";
 import StockMovementsDrawer from "@/components/admin/inventory/StockMovementsDrawer";
 import { useAdminInventory } from "@/hooks/useAdminInventory";
+import PageHeader from "@/components/ui/PageHeader";
+import ErrorState from "@/components/ui/ErrorState";
+import FilterBar from "@/components/admin/common/FilterBar";
 import type { InventoryItemDto, InventoryListParams } from "@/types/inventory";
 
 function InventoryPageContent() {
@@ -20,7 +23,7 @@ function InventoryPageContent() {
   const lowStockOnly = searchParams.get("lowStockOnly") === "true";
 
   const params: InventoryListParams = { page, pageSize, keyword, lowStockOnly: lowStockOnly || undefined };
-  const { data, isLoading, isError } = useAdminInventory(params);
+  const { data, isLoading, isError, refetch } = useAdminInventory(params);
 
   const [adjustItem, setAdjustItem] = useState<InventoryItemDto | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItemDto | null>(null);
@@ -37,24 +40,24 @@ function InventoryPageContent() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, width: "100%", justifyContent: "space-between" }} wrap>
-        <Space wrap>
-          <Input.Search
-            allowClear
-            placeholder="Tìm theo SKU, tên sản phẩm"
-            defaultValue={keyword}
-            onSearch={(value) => updateParams({ keyword: value || undefined })}
-            style={{ width: 260 }}
-          />
-          <Space>
-            <Switch checked={lowStockOnly} onChange={(checked) => updateParams({ lowStockOnly: checked ? "true" : undefined })} />
-            <span>Chỉ hiện tồn thấp</span>
-          </Space>
+      <PageHeader title="Tồn kho" description="Quản lý tồn kho sản phẩm" />
+
+      <FilterBar>
+        <Input.Search
+          allowClear
+          placeholder="Tìm theo SKU, tên sản phẩm"
+          defaultValue={keyword}
+          onSearch={(value) => updateParams({ keyword: value || undefined })}
+          style={{ width: 260 }}
+        />
+        <Space>
+          <Switch checked={lowStockOnly} onChange={(checked) => updateParams({ lowStockOnly: checked ? "true" : undefined })} />
+          <span>Chỉ hiện tồn thấp</span>
         </Space>
-      </Space>
+      </FilterBar>
 
       {isError ? (
-        <Alert type="error" message="Không tải được dữ liệu tồn kho" />
+        <ErrorState message="Không tải được dữ liệu tồn kho" onRetry={() => void refetch()} />
       ) : (
         <InventoryTable
           items={data?.items ?? []}

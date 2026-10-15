@@ -19,13 +19,13 @@ export default function KpiCard({ title, kpi, isMoney }: KpiCardProps) {
       <Statistic title={title} value={formattedValue} />
       <div style={{ marginTop: 8, fontSize: 13 }}>
         {kpi.changePercent === null ? (
-          <span style={{ color: "#8c8c8c" }}>—</span>
+          <span style={{ color: "var(--color-muted)" }}>—</span>
         ) : (
-          <span style={{ color: kpi.changePercent >= 0 ? "#389e0d" : "#cf1322" }}>
+          <span style={{ color: kpi.changePercent >= 0 ? "var(--color-success)" : "var(--color-danger)" }}>
             {kpi.changePercent >= 0 ? <FiArrowUp /> : <FiArrowDown />} {Math.abs(kpi.changePercent).toFixed(1)}%
           </span>
         )}{" "}
-        <span style={{ color: "#8c8c8c" }}>so với kỳ trước</span>
+        <span style={{ color: "var(--color-muted)" }}>so với kỳ trước</span>
       </div>
     </Card>
   );

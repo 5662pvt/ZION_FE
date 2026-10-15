@@ -103,7 +103,7 @@ export default function CategoryFormModal({ open, mode, category, parent, onClos
       cancelText="Hủy"
     >
       {mode === "create" && (
-        <p style={{ color: "#8c8c8c", marginBottom: 16 }}>
+        <p style={{ color: "var(--color-muted)", marginBottom: 16 }}>
           Danh mục cha: {parent ? parent.name : "(không có — danh mục gốc)"}
         </p>
       )}

@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Button, Form, Input, Modal, Popconfirm, Table, Tag, Typography, type TableProps } from "antd";
+import { Button, Form, Input, Modal, Popconfirm, Typography, type TableProps } from "antd";
 import StarRating from "@/components/shop/reviews/StarRating";
 import { useHideReview, useShowReview } from "@/hooks/useAdminReviews";
 import { toast } from "@/utils/toast";
 import { ApiError } from "@/services/apiClient";
+import { ReviewStatusBadge } from "@/components/ui/StatusBadge";
+import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
+import ListCard from "@/components/admin/common/ListCard";
 import type { AdminReviewDto } from "@/types/reviews";
 
 const { Paragraph, Text } = Typography;
@@ -84,9 +87,7 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
       dataIndex: "status",
       render: (status: AdminReviewDto["status"], record) => (
         <div>
-          <Tag color={status === "Published" ? "green" : "default"}>
-            {status === "Published" ? "Đã hiển thị" : "Đã ẩn"}
-          </Tag>
+          <ReviewStatusBadge status={status} />
           {status === "Hidden" && record.hiddenReason && (
             <div>
               <Text type="secondary" style={{ fontSize: 12 }}>
@@ -117,19 +118,39 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
 
   return (
     <>
-      <Table<AdminReviewDto>
+      <ResponsiveTable<AdminReviewDto>
         rowKey="id"
         loading={loading}
         dataSource={items}
         columns={columns}
-        locale={{ emptyText: "Chưa có đánh giá" }}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: pagination.total,
-          showSizeChanger: true,
-          onChange: onPageChange,
-        }}
+        emptyText="Chưa có đánh giá"
+        pagination={pagination}
+        onPageChange={onPageChange}
+        renderCard={(record) => (
+          <ListCard
+            title={record.productName}
+            status={<ReviewStatusBadge status={record.status} />}
+            fields={[
+              { label: "Sao", value: <StarRating value={record.rating} allowHalf={false} fontSize={14} /> },
+              { label: "Tác giả", value: record.authorName },
+              { label: "Nội dung", value: record.content },
+              { label: "Ngày", value: dayjs(record.createdAt).format("DD/MM/YYYY HH:mm") },
+            ]}
+            action={
+              record.status === "Published" ? (
+                <Button size="small" onClick={() => setHideModal({ open: true, review: record })}>
+                  Ẩn
+                </Button>
+              ) : (
+                <Popconfirm title="Hiện lại đánh giá này?" okText="Hiện" cancelText="Đóng" onConfirm={() => handleShow(record)}>
+                  <Button size="small" type="primary" loading={showReview.isPending}>
+                    Hiện
+                  </Button>
+                </Popconfirm>
+              )
+            }
+          />
+        )}
       />
       <Modal
         open={hideModal.open}

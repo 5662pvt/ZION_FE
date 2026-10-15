@@ -27,7 +27,6 @@ export interface ProductFiltersValue {
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
-  sort?: string;
 }
 
 interface ProductFiltersProps {
@@ -41,40 +40,47 @@ export default function ProductFilters({ value, onChange }: ProductFiltersProps)
   const isClient = useIsClient();
 
   return (
-    <Space wrap>
-      {isClient ? (
-        <TreeSelect
-          allowClear
-          placeholder="Danh mục"
-          style={{ width: 220 }}
-          loading={categoriesLoading}
-          treeData={treeData}
-          value={value.categoryId}
-          onChange={(categoryId) => onChange({ categoryId })}
-        />
-      ) : (
-        <Select disabled placeholder="Danh mục" style={{ width: 220 }} />
-      )}
-      <InputNumber
-        placeholder="Giá từ"
-        min={0}
-        style={{ width: 140 }}
-        value={value.minPrice}
-        onChange={(minPrice) => onChange({ minPrice: minPrice ?? undefined })}
-      />
-      <InputNumber
-        placeholder="Giá đến"
-        min={0}
-        style={{ width: 140 }}
-        value={value.maxPrice}
-        onChange={(maxPrice) => onChange({ maxPrice: maxPrice ?? undefined })}
-      />
-      <Select
-        style={{ width: 180 }}
-        options={SORT_OPTIONS}
-        value={value.sort ?? ""}
-        onChange={(sort) => onChange({ sort: sort || undefined })}
-      />
+    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+      <div>
+        <label htmlFor="product-filter-category" style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>
+          Danh mục
+        </label>
+        {isClient ? (
+          <TreeSelect
+            id="product-filter-category"
+            allowClear
+            placeholder="Tất cả danh mục"
+            style={{ width: "100%" }}
+            loading={categoriesLoading}
+            treeData={treeData}
+            value={value.categoryId}
+            onChange={(categoryId) => onChange({ categoryId })}
+          />
+        ) : (
+          <Select disabled placeholder="Danh mục" style={{ width: "100%" }} />
+        )}
+      </div>
+      <div>
+        <span style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>Khoảng giá</span>
+        <Space.Compact style={{ width: "100%" }}>
+          <InputNumber
+            aria-label="Giá từ"
+            placeholder="Giá từ"
+            min={0}
+            style={{ width: "50%" }}
+            value={value.minPrice}
+            onChange={(minPrice) => onChange({ minPrice: minPrice ?? undefined })}
+          />
+          <InputNumber
+            aria-label="Giá đến"
+            placeholder="Giá đến"
+            min={0}
+            style={{ width: "50%" }}
+            value={value.maxPrice}
+            onChange={(maxPrice) => onChange({ maxPrice: maxPrice ?? undefined })}
+          />
+        </Space.Compact>
+      </div>
     </Space>
   );
 }

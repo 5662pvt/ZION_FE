@@ -90,7 +90,7 @@ export default function ReviewForm({ productId }: ReviewFormProps) {
   if (eligibility.myReview && !editing) {
     const myReview = eligibility.myReview;
     return (
-      <div style={{ marginBottom: 24, padding: 16, background: "#fafafa", borderRadius: 8 }}>
+      <div style={{ marginBottom: 24, padding: 16, background: "var(--color-page)", borderRadius: 8 }}>
         <Text strong>Đánh giá của bạn</Text>
         <div style={{ margin: "8px 0" }}>
           <StarRating value={myReview.rating} allowHalf={false} fontSize={14} />

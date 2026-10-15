@@ -1,8 +1,11 @@
 "use client";
 
-import { Button, Space, Table, Tag, type TableProps } from "antd";
+import { Button, Space, type TableProps } from "antd";
 import { useAuth } from "@/hooks/useAuth";
 import { ROLES } from "@/constants/roles";
+import { StockLevelBadge } from "@/components/ui/StatusBadge";
+import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
+import ListCard from "@/components/admin/common/ListCard";
 import type { InventoryItemDto } from "@/types/inventory";
 
 interface InventoryTableProps {
@@ -36,8 +39,8 @@ export default function InventoryTable({
       title: "Trạng thái",
       key: "status",
       render: (_, record) => {
-        if (record.available <= 0) return <Tag color="red">Hết hàng</Tag>;
-        if (record.isLowStock) return <Tag color="orange">Sắp hết</Tag>;
+        if (record.available <= 0) return <StockLevelBadge level="OutOfStock" />;
+        if (record.isLowStock) return <StockLevelBadge level="LowStock" />;
         return null;
       },
     },
@@ -60,19 +63,45 @@ export default function InventoryTable({
   ];
 
   return (
-    <Table<InventoryItemDto>
+    <ResponsiveTable<InventoryItemDto>
       rowKey="productId"
       loading={loading}
       dataSource={items}
       columns={columns}
-      locale={{ emptyText: "Không có dữ liệu tồn kho" }}
-      pagination={{
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        total: pagination.total,
-        showSizeChanger: true,
-        onChange: onPageChange,
-      }}
+      emptyText="Không có dữ liệu tồn kho"
+      pagination={pagination}
+      onPageChange={onPageChange}
+      renderCard={(record) => (
+        <ListCard
+          title={record.productName}
+          status={
+            record.available <= 0 ? (
+              <StockLevelBadge level="OutOfStock" />
+            ) : record.isLowStock ? (
+              <StockLevelBadge level="LowStock" />
+            ) : undefined
+          }
+          fields={[
+            { label: "SKU", value: record.sku },
+            { label: "Tồn thực tế", value: record.onHand },
+            { label: "Đang giữ", value: record.reserved },
+            { label: "Có thể bán", value: record.available },
+            { label: "Ngưỡng", value: record.lowStockThreshold },
+          ]}
+          action={
+            <>
+              {canAdjust && (
+                <Button size="small" onClick={() => onAdjust(record)}>
+                  Điều chỉnh
+                </Button>
+              )}
+              <Button size="small" onClick={() => onViewHistory(record)}>
+                Lịch sử
+              </Button>
+            </>
+          }
+        />
+      )}
     />
   );
 }

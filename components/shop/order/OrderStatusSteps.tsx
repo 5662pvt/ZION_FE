@@ -1,20 +1,9 @@
-import { Alert, Steps } from "antd";
-import type { OrderDto, OrderStatus } from "@/types/orders";
+import { Alert, Timeline, Typography } from "antd";
+import dayjs from "dayjs";
+import { orderStatusLabel } from "@/utils/orderStatus";
+import type { OrderDto } from "@/types/orders";
 
-const COD_STEPS: Array<{ status: OrderStatus; title: string }> = [
-  { status: "PendingStock", title: "Đang giữ hàng" },
-  { status: "Confirmed", title: "Đã xác nhận" },
-  { status: "Shipped", title: "Đang giao" },
-  { status: "Completed", title: "Hoàn tất" },
-];
-
-const ONLINE_STEPS: Array<{ status: OrderStatus; title: string }> = [
-  { status: "PendingStock", title: "Đang giữ hàng" },
-  { status: "AwaitingPayment", title: "Chờ thanh toán" },
-  { status: "Paid", title: "Đã thanh toán" },
-  { status: "Shipped", title: "Đang giao" },
-  { status: "Completed", title: "Hoàn tất" },
-];
+const { Text } = Typography;
 
 interface OrderStatusStepsProps {
   order: OrderDto;
@@ -33,8 +22,18 @@ export default function OrderStatusSteps({ order }: OrderStatusStepsProps) {
     );
   }
 
-  const steps = order.paymentMethod === "Online" ? ONLINE_STEPS : COD_STEPS;
-  const current = Math.max(0, steps.findIndex((s) => s.status === order.status));
+  const items = order.history.map((entry, index) => ({
+    color: index === order.history.length - 1 ? "blue" : "green",
+    children: (
+      <div>
+        <Text strong>{orderStatusLabel(entry.status)}</Text>
+        <div>
+          <Text type="secondary">{dayjs(entry.at).format("DD/MM/YYYY HH:mm")}</Text>
+        </div>
+        {entry.note && <Text type="secondary">{entry.note}</Text>}
+      </div>
+    ),
+  }));
 
-  return <Steps current={current} items={steps.map((s) => ({ title: s.title }))} style={{ marginBottom: 16 }} />;
+  return <Timeline items={items} style={{ marginBottom: 16 }} />;
 }

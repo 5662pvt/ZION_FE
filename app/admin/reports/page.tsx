@@ -9,6 +9,7 @@ import { ROLES } from "@/constants/roles";
 import OverviewTab from "@/components/admin/reports/OverviewTab";
 import ProductsTab from "@/components/admin/reports/ProductsTab";
 import PromotionsTab from "@/components/admin/reports/PromotionsTab";
+import PageHeader from "@/components/ui/PageHeader";
 
 const { RangePicker } = DatePicker;
 const DATE_FORMAT = "YYYY-MM-DD";
@@ -66,7 +67,7 @@ function ReportsPageContent() {
 
   return (
     <div>
-      <h1>Báo cáo</h1>
+      <PageHeader title="Báo cáo" description="Doanh thu, sản phẩm và hiệu quả khuyến mãi" />
       <Space style={{ marginBottom: 16 }} wrap>
         <RangePicker
           value={rangeValue}

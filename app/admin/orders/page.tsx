@@ -3,10 +3,13 @@
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import dayjs, { type Dayjs } from "dayjs";
-import { Alert, DatePicker, Input, Select, Space, Spin } from "antd";
+import { DatePicker, Input, Select, Spin } from "antd";
 import AdminOrderTable from "@/components/admin/orders/AdminOrderTable";
 import { useAdminOrders } from "@/hooks/useAdminOrders";
 import { orderStatusLabel } from "@/utils/orderStatus";
+import PageHeader from "@/components/ui/PageHeader";
+import ErrorState from "@/components/ui/ErrorState";
+import FilterBar from "@/components/admin/common/FilterBar";
 import type { AdminOrderListParams } from "@/types/adminOrders";
 import type { OrderStatus } from "@/types/orders";
 
@@ -39,7 +42,7 @@ function OrdersPageContent() {
   const to = searchParams.get("to") ?? undefined;
 
   const params: AdminOrderListParams = { page, pageSize, keyword, status, from, to };
-  const { data, isLoading, isError } = useAdminOrders(params);
+  const { data, isLoading, isError, refetch } = useAdminOrders(params);
 
   function updateParams(next: Record<string, string | undefined>) {
     const sp = new URLSearchParams(searchParams.toString());
@@ -55,8 +58,9 @@ function OrdersPageContent() {
 
   return (
     <div>
-      <h1>Đơn hàng</h1>
-      <Space style={{ marginBottom: 16 }} wrap>
+      <PageHeader title="Đơn hàng" description="Quản lý đơn hàng và trạng thái giao hàng" />
+
+      <FilterBar>
         <Input.Search
           allowClear
           placeholder="Mã đơn / tên / SĐT"
@@ -81,10 +85,10 @@ function OrdersPageContent() {
             })
           }
         />
-      </Space>
+      </FilterBar>
 
       {isError ? (
-        <Alert type="error" message="Không tải được danh sách đơn hàng" />
+        <ErrorState message="Không tải được danh sách đơn hàng" onRetry={() => void refetch()} />
       ) : (
         <AdminOrderTable
           items={data?.items ?? []}

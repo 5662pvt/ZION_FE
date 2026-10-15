@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/components/common/AuthProvider";
 import { ApiError } from "@/services/apiClient";
+import { antdTheme } from "@/theme/antdTheme";
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -27,7 +28,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ConfigProvider locale={viVN} theme={{ token: { colorPrimary: "#1677ff" } }}>
+    <ConfigProvider locale={viVN} theme={antdTheme}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           {children}

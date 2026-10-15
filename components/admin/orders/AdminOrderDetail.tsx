@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import dayjs from "dayjs";
-import { Alert, Button, Flex, Result, Space, Spin, Table, Tag, Typography, type TableProps } from "antd";
+import { Alert, Button, Flex, Result, Space, Spin, Table, Typography, type TableProps } from "antd";
 import AdminOrderTimeline from "./AdminOrderTimeline";
 import AdminOrderActions from "./AdminOrderActions";
 import { useAdminOrder } from "@/hooks/useAdminOrders";
 import { ApiError } from "@/services/apiClient";
-import { orderStatusColor, orderStatusLabel, paymentMethodLabel } from "@/utils/orderStatus";
+import { paymentMethodLabel } from "@/utils/orderStatus";
 import { formatVnd } from "@/utils/money";
 import { formatAddress } from "@/utils/address";
+import { OrderStatusBadge, StatusBadge } from "@/components/ui/StatusBadge";
 import type { OrderLineDto } from "@/types/orders";
 
 const { Title, Text } = Typography;
@@ -54,7 +55,7 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
       render: (name: string, record) => (
         <Space size={6}>
           <span>{name}</span>
-          {record.isGift && <Tag color="gold">Quà tặng</Tag>}
+          {record.isGift && <StatusBadge color="var(--color-warning)">Quà tặng</StatusBadge>}
         </Space>
       ),
     },
@@ -81,7 +82,7 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
           <Text type="secondary">Ngày đặt: {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}</Text>
         </div>
         <Space direction="vertical" align="end">
-          <Tag color={orderStatusColor(order.status)}>{orderStatusLabel(order.status)}</Tag>
+          <OrderStatusBadge status={order.status} />
           <Text type="secondary">{paymentMethodLabel(order.paymentMethod)}</Text>
         </Space>
       </Flex>

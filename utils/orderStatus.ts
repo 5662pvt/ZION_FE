@@ -20,6 +20,16 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   Cancelled: "red",
 };
 
+const STATUS_HEX: Record<OrderStatus, string> = {
+  PendingStock: "#B7791F",
+  AwaitingPayment: "#B7791F",
+  Confirmed: "#0F9D8A",
+  Paid: "#0F9D8A",
+  Shipped: "#142B4A",
+  Completed: "#16845B",
+  Cancelled: "#C2413B",
+};
+
 const CUSTOMER_CANCELLABLE_STATUSES: ReadonlySet<OrderStatus> = new Set(["PendingStock", "AwaitingPayment", "Confirmed"]);
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -33,6 +43,10 @@ export function orderStatusLabel(status: OrderStatus): string {
 
 export function orderStatusColor(status: OrderStatus): string {
   return STATUS_COLORS[status];
+}
+
+export function orderStatusHex(status: OrderStatus): string {
+  return STATUS_HEX[status];
 }
 
 export function canCustomerCancel(status: OrderStatus): boolean {

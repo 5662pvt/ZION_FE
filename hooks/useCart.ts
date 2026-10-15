@@ -20,6 +20,12 @@ export function useCart() {
   return { ...query, isCartLoading: isAuthLoading || query.isPending };
 }
 
+export function useInvalidateCart() {
+  const queryClient = useQueryClient();
+  const cartKey = useCartKey();
+  return () => queryClient.invalidateQueries({ queryKey: cartKey });
+}
+
 export function useAddToCart() {
   const queryClient = useQueryClient();
   const cartKey = useCartKey();

@@ -1,7 +1,8 @@
 "use client";
 
-import { Card, Flex, Image, Space, Tag, Typography } from "antd";
+import { Card, Flex, Image, Space, Typography } from "antd";
 import { useGiftPreview } from "@/hooks/useGiftPreview";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 const { Text } = Typography;
 
@@ -25,14 +26,16 @@ export default function GiftPreview() {
                 style={{ objectFit: "cover" }}
               />
             ) : (
-              <div style={{ width: 48, height: 48, background: "#f0f0f0" }} />
+              <div style={{ width: 48, height: 48, background: "var(--color-border)" }} />
             )}
             <div style={{ flex: 1 }}>
               <Flex gap={8} align="center" wrap>
                 <Text delete={!gift.available}>
                   {gift.productName} × {gift.quantity}
                 </Text>
-                <Tag color={gift.available ? "gold" : "default"}>{gift.available ? "Quà tặng" : "Hết quà"}</Tag>
+                <StatusBadge color={gift.available ? "var(--color-warning)" : "var(--color-muted)"}>
+                  {gift.available ? "Quà tặng" : "Hết quà"}
+                </StatusBadge>
               </Flex>
               <div>
                 <Text type="secondary" style={{ fontSize: 12 }}>

@@ -1,24 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
-import { Table, Tag, type TableProps } from "antd";
+import { Button, type TableProps } from "antd";
 import { formatVnd } from "@/utils/money";
+import { PromotionStatusBadge } from "@/components/ui/StatusBadge";
+import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
+import ListCard from "@/components/admin/common/ListCard";
 import type { PromotionDto, PromotionStatus, PromotionSummaryDto } from "@/types/promotions";
-
-const STATUS_COLOR: Record<PromotionStatus, string> = {
-  Active: "green",
-  Inactive: "default",
-  Scheduled: "blue",
-  Expired: "red",
-};
-
-const STATUS_LABEL: Record<PromotionStatus, string> = {
-  Active: "Đang chạy",
-  Inactive: "Tạm tắt",
-  Scheduled: "Sắp diễn ra",
-  Expired: "Hết hạn",
-};
 
 function formatValue(promotion: Pick<PromotionDto, "type" | "value" | "maxDiscountAmount" | "giftItems">): string {
   if (promotion.type === "Gift") return `Tặng ${promotion.giftItems.length} sản phẩm`;
@@ -45,6 +35,7 @@ interface PromotionTableProps {
 }
 
 export default function PromotionTable({ items, loading, pagination, onPageChange }: PromotionTableProps) {
+  const router = useRouter();
   const columns: TableProps<PromotionSummaryDto>["columns"] = [
     {
       title: "Tên",
@@ -85,24 +76,37 @@ export default function PromotionTable({ items, loading, pagination, onPageChang
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (status: PromotionStatus) => <Tag color={STATUS_COLOR[status]}>{STATUS_LABEL[status]}</Tag>,
+      render: (status: PromotionStatus) => <PromotionStatusBadge status={status} />,
     },
   ];
 
   return (
-    <Table<PromotionSummaryDto>
+    <ResponsiveTable<PromotionSummaryDto>
       rowKey="id"
       loading={loading}
       dataSource={items}
       columns={columns}
-      locale={{ emptyText: "Chưa có khuyến mãi" }}
-      pagination={{
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        total: pagination.total,
-        showSizeChanger: true,
-        onChange: onPageChange,
-      }}
+      emptyText="Chưa có khuyến mãi"
+      pagination={pagination}
+      onPageChange={onPageChange}
+      renderCard={(record) => (
+        <ListCard
+          title={record.name}
+          status={<PromotionStatusBadge status={record.status} />}
+          fields={[
+            { label: "Loại / Giá trị", value: formatValue(record) },
+            { label: "Đơn tối thiểu", value: formatVnd(record.minOrderSubtotal) },
+            { label: "Phạm vi", value: formatScope(record) },
+            { label: "Thời gian", value: `${dayjs(record.startsAt).format("DD/MM/YYYY")} – ${dayjs(record.endsAt).format("DD/MM/YYYY")}` },
+            { label: "Lượt dùng", value: `${record.usedCount}/${record.usageLimit ?? "∞"}` },
+          ]}
+          action={
+            <Button size="small" onClick={() => router.push(`/admin/promotions/${record.id}`)}>
+              Xem chi tiết
+            </Button>
+          }
+        />
+      )}
     />
   );
 }

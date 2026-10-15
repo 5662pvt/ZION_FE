@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import dayjs from "dayjs";
-import { Alert, Button, Flex, Result, Space, Spin, Table, Tag, Typography, type TableProps } from "antd";
+import { Alert, Button, Flex, Result, Skeleton, Space, Spin, Table, Typography, type TableProps } from "antd";
+import Breadcrumbs from "@/components/shop/layout/Breadcrumbs";
 import OrderStatusSteps from "./OrderStatusSteps";
 import OrderActions from "./OrderActions";
 import { useOrder, useOrderPolling } from "@/hooks/useOrders";
 import { ApiError } from "@/services/apiClient";
-import { orderStatusColor, orderStatusLabel, paymentMethodLabel } from "@/utils/orderStatus";
+import { paymentMethodLabel } from "@/utils/orderStatus";
 import { formatVnd } from "@/utils/money";
 import { formatAddress } from "@/utils/address";
+import { OrderStatusBadge, StatusBadge } from "@/components/ui/StatusBadge";
 import type { OrderLineDto } from "@/types/orders";
 
 const { Title, Text } = Typography;
@@ -27,8 +29,10 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: 48 }}>
-        <Spin size="large" />
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: 24 }}>
+        <Skeleton active paragraph={{ rows: 2 }} style={{ marginBottom: 24 }} />
+        <Skeleton active paragraph={{ rows: 4 }} style={{ marginBottom: 24 }} />
+        <Skeleton active paragraph={{ rows: 6 }} />
       </div>
     );
   }
@@ -50,7 +54,16 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
   if (isError || !order) {
     return (
       <div style={{ maxWidth: 960, margin: "0 auto", padding: 24 }}>
-        <Alert type="error" message="Không tải được thông tin đơn hàng" showIcon />
+        <Alert
+          type="error"
+          message="Không tải được thông tin đơn hàng"
+          showIcon
+          action={
+            <Button size="small" onClick={() => refetch()}>
+              Thử lại
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -62,7 +75,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
       render: (name: string, record) => (
         <Space size={6}>
           <span>{name}</span>
-          {record.isGift && <Tag color="gold">Quà tặng</Tag>}
+          {record.isGift && <StatusBadge color="var(--color-warning)">Quà tặng</StatusBadge>}
         </Space>
       ),
     },
@@ -91,6 +104,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
 
   return (
     <div style={{ maxWidth: 960, margin: "0 auto", padding: 24 }}>
+      <Breadcrumbs items={[{ label: "Đơn hàng của tôi", href: "/account/orders" }, { label: order.code }]} />
       {paymentResult === "success" && (
         <Alert
           type="success"
@@ -116,7 +130,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
           <Text type="secondary">Ngày đặt: {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}</Text>
         </div>
         <Space direction="vertical" align="end">
-          <Tag color={orderStatusColor(order.status)}>{orderStatusLabel(order.status)}</Tag>
+          <OrderStatusBadge status={order.status} />
           <Text type="secondary">{paymentMethodLabel(order.paymentMethod)}</Text>
         </Space>
       </Flex>

@@ -26,7 +26,7 @@ export default function TopProductsChart({ data, sortBy, loading }: TopProductsC
         <XAxis type="number" tickFormatter={sortBy === "revenue" ? formatCompactVnd : undefined} />
         <YAxis type="category" dataKey="productName" width={160} />
         <Tooltip formatter={(value: number) => (sortBy === "revenue" ? formatVnd(value) : value)} />
-        <Bar dataKey={sortBy} name={sortBy === "revenue" ? "Doanh thu" : "Số lượng"} fill="#1677ff" />
+        <Bar dataKey={sortBy} name={sortBy === "revenue" ? "Doanh thu" : "Số lượng"} fill="#0F9D8A" />
       </BarChart>
     </ResponsiveContainer>
   );

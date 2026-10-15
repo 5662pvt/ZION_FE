@@ -76,4 +76,6 @@ export interface MyOrdersParams {
   page?: number;
   pageSize?: number;
   status?: OrderStatus;
+  from?: string;
+  to?: string;
 }

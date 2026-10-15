@@ -1,8 +1,9 @@
 "use client";
 
 import dayjs from "dayjs";
-import { Empty, Pagination, Spin, Tag, Typography } from "antd";
+import { Empty, Pagination, Spin, Typography } from "antd";
 import StarRating from "./StarRating";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { ReviewDto } from "@/types/reviews";
 
 const { Text, Paragraph } = Typography;
@@ -30,14 +31,14 @@ export default function ReviewList({ items, loading, pagination, onPageChange }:
   return (
     <div>
       {items.map((review) => (
-        <div key={review.id} style={{ borderBottom: "1px solid #f0f0f0", padding: "16px 0" }}>
+        <div key={review.id} style={{ borderBottom: "1px solid var(--color-border)", padding: "16px 0" }}>
           <StarRating value={review.rating} allowHalf={false} fontSize={14} />
           <div style={{ margin: "4px 0" }}>
             <Text strong>{review.authorName}</Text>
             {review.isVerifiedPurchase && (
-              <Tag color="green" style={{ marginLeft: 8 }}>
+              <StatusBadge color="var(--color-success)" style={{ marginLeft: 8 }}>
                 Đã mua hàng
-              </Tag>
+              </StatusBadge>
             )}
             <Text type="secondary" style={{ marginLeft: 8 }}>
               {dayjs(review.createdAt).format("DD/MM/YYYY")}

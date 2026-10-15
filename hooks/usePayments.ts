@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { paymentsService } from "@/services/payments.service";
 import { queryKeys } from "@/constants/queryKeys";
-import type { SimulatePaymentRequest } from "@/types/payments";
+import type { PaymentChannel, SimulatePaymentRequest } from "@/types/payments";
 
 function idempotencyKeyStorageKey(orderId: string): string {
   return `zion.payKey.${orderId}`;
@@ -33,7 +33,8 @@ export function usePaymentIntent(intentId: string) {
 export function useCreatePaymentIntent() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderId: string) => paymentsService.createIntent(orderId, getOrCreateIdempotencyKey(orderId)),
+    mutationFn: ({ orderId, channel }: { orderId: string; channel?: PaymentChannel }) =>
+      paymentsService.createIntent(orderId, getOrCreateIdempotencyKey(orderId), channel),
     onSuccess: (intent) => {
       queryClient.setQueryData(queryKeys.payments.intent(intent.intentId), intent);
       if (intent.status === "Succeeded" || intent.status === "Failed") {

@@ -1,0 +1,31 @@
+.tableView {
+  display: block;
+}
+
+.cardView {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .tableView {
+    display: none;
+  }
+
+  .cardView {
+    display: block;
+  }
+}
+
+.cardSkeleton {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}

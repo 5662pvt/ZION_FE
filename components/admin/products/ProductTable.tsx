@@ -1,24 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button, Image, Popconfirm, Space, Table, Tag, type TableProps } from "antd";
+import { Button, Image, Popconfirm, Space, type TableProps } from "antd";
 import { formatVnd } from "@/utils/money";
 import { toast } from "@/utils/toast";
 import { useArchiveProduct, usePublishProduct } from "@/hooks/useAdminProducts";
 import { ApiError } from "@/services/apiClient";
-import type { ProductSummaryDto } from "@/types/products";
-
-const STATUS_COLOR: Record<string, string> = {
-  Draft: "default",
-  Published: "green",
-  Archived: "red",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  Draft: "Nháp",
-  Published: "Đã xuất bản",
-  Archived: "Lưu trữ",
-};
+import { ProductStatusBadge } from "@/components/ui/StatusBadge";
+import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
+import ListCard from "@/components/admin/common/ListCard";
+import type { ProductStatus, ProductSummaryDto } from "@/types/products";
 
 interface ProductTableProps {
   items: ProductSummaryDto[];
@@ -55,7 +46,7 @@ export default function ProductTable({ items, loading, pagination, onPageChange 
         url ? (
           <Image src={url} alt="" width={48} height={48} style={{ objectFit: "cover" }} />
         ) : (
-          <div style={{ width: 48, height: 48, background: "#f0f0f0" }} />
+          <div style={{ width: 48, height: 48, background: "var(--color-border)" }} />
         ),
     },
     { title: "Tên", dataIndex: "name" },
@@ -65,7 +56,7 @@ export default function ProductTable({ items, loading, pagination, onPageChange 
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (status: string) => <Tag color={STATUS_COLOR[status] ?? "default"}>{STATUS_LABEL[status] ?? status}</Tag>,
+      render: (status: string) => <ProductStatusBadge status={status as ProductStatus} />,
     },
     {
       title: "Thao tác",
@@ -77,13 +68,13 @@ export default function ProductTable({ items, loading, pagination, onPageChange 
           </Button>
           {record.status !== "Published" && (
             <Popconfirm title="Xuất bản sản phẩm này?" onConfirm={() => handlePublish(record.id)}>
-              <Button size="small">Publish</Button>
+              <Button size="small">Xuất bản</Button>
             </Popconfirm>
           )}
           {record.status !== "Archived" && (
             <Popconfirm title="Lưu trữ sản phẩm này?" onConfirm={() => handleArchive(record.id)}>
               <Button size="small" danger>
-                Archive
+                Lưu trữ
               </Button>
             </Popconfirm>
           )}
@@ -93,19 +84,44 @@ export default function ProductTable({ items, loading, pagination, onPageChange 
   ];
 
   return (
-    <Table<ProductSummaryDto>
+    <ResponsiveTable<ProductSummaryDto>
       rowKey="id"
       loading={loading}
       dataSource={items}
       columns={columns}
-      locale={{ emptyText: "Chưa có sản phẩm" }}
-      pagination={{
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        total: pagination.total,
-        showSizeChanger: true,
-        onChange: onPageChange,
-      }}
+      emptyText="Chưa có sản phẩm"
+      pagination={pagination}
+      onPageChange={onPageChange}
+      renderCard={(record) => (
+        <ListCard
+          title={record.name}
+          status={<ProductStatusBadge status={record.status as ProductStatus} />}
+          fields={[
+            { label: "SKU", value: record.sku },
+            { label: "Giá", value: formatVnd(record.price) },
+            { label: "Danh mục", value: record.categoryName ?? "—" },
+          ]}
+          action={
+            <>
+              <Button size="small" onClick={() => router.push(`/admin/products/${record.id}/edit`)}>
+                Sửa
+              </Button>
+              {record.status !== "Published" && (
+                <Popconfirm title="Xuất bản sản phẩm này?" onConfirm={() => handlePublish(record.id)}>
+                  <Button size="small">Xuất bản</Button>
+                </Popconfirm>
+              )}
+              {record.status !== "Archived" && (
+                <Popconfirm title="Lưu trữ sản phẩm này?" onConfirm={() => handleArchive(record.id)}>
+                  <Button size="small" danger>
+                    Lưu trữ
+                  </Button>
+                </Popconfirm>
+              )}
+            </>
+          }
+        />
+      )}
     />
   );
 }

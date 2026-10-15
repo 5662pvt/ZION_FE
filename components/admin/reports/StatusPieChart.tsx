@@ -3,25 +3,15 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, type TooltipProps } from "recharts";
 import { Empty, Skeleton } from "antd";
 import { useIsClient } from "@/hooks/useIsClient";
-import { orderStatusColor, orderStatusLabel } from "@/utils/orderStatus";
+import { orderStatusHex, orderStatusLabel } from "@/utils/orderStatus";
 import type { OrderStatus } from "@/types/orders";
 import type { StatusBreakdownItem } from "@/types/reports";
-
-const ANTD_COLOR_HEX: Record<string, string> = {
-  default: "#d9d9d9",
-  gold: "#faad14",
-  blue: "#1677ff",
-  cyan: "#13c2c2",
-  geekblue: "#2f54eb",
-  green: "#52c41a",
-  red: "#f5222d",
-};
 
 function StatusTooltip({ active, payload }: TooltipProps<number, string>) {
   if (!active || !payload || payload.length === 0) return null;
   const point = payload[0].payload as StatusBreakdownItem;
   return (
-    <div style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 4, padding: 8 }}>
+    <div style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 4, padding: 8 }}>
       <div>{orderStatusLabel(point.status)}</div>
       <div>Số đơn: {point.count}</div>
     </div>
@@ -45,7 +35,7 @@ export default function StatusPieChart({ data, loading }: StatusPieChartProps) {
       <PieChart>
         <Pie data={data} dataKey="count" nameKey="status" innerRadius={60} outerRadius={100}>
           {data.map((entry) => (
-            <Cell key={entry.status} fill={ANTD_COLOR_HEX[orderStatusColor(entry.status)] ?? "#999"} />
+            <Cell key={entry.status} fill={orderStatusHex(entry.status)} />
           ))}
         </Pie>
         <Tooltip content={<StatusTooltip />} />

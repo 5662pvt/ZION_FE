@@ -21,20 +21,35 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
           alt={active.alt ?? name}
           width="100%"
           height={400}
-          style={{ objectFit: "cover" }}
+          style={{ objectFit: "cover", borderRadius: "var(--radius-card)" }}
         />
       ) : (
-        <div style={{ width: "100%", height: 400, background: "#f5f5f5" }} />
+        <div
+          role="img"
+          aria-label={`Chưa có hình ảnh cho ${name}`}
+          style={{
+            width: "100%",
+            height: 400,
+            background: "var(--color-border)",
+            borderRadius: "var(--radius-card)",
+          }}
+        />
       )}
       {images.length > 1 && (
         <Space style={{ marginTop: 12 }} wrap>
           {images.map((image, index) => (
-            <div
+            <button
               key={image.id}
+              type="button"
+              aria-label={`Xem ảnh ${index + 1} của ${name}`}
+              aria-pressed={index === activeIndex}
               onClick={() => setActiveIndex(index)}
               style={{
                 cursor: "pointer",
-                border: index === activeIndex ? "2px solid #1677ff" : "2px solid transparent",
+                padding: 0,
+                lineHeight: 0,
+                background: "none",
+                border: index === activeIndex ? "2px solid var(--color-action)" : "2px solid transparent",
                 borderRadius: 4,
               }}
             >
@@ -46,7 +61,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
                 preview={false}
                 style={{ objectFit: "cover" }}
               />
-            </div>
+            </button>
           ))}
         </Space>
       )}

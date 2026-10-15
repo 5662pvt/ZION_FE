@@ -7,6 +7,8 @@ function buildMyOrdersQuery(params: MyOrdersParams): string {
   if (params.page) search.set("page", String(params.page));
   if (params.pageSize) search.set("pageSize", String(params.pageSize));
   if (params.status) search.set("status", params.status);
+  if (params.from) search.set("from", params.from);
+  if (params.to) search.set("to", params.to);
 
   const qs = search.toString();
   return qs ? `?${qs}` : "";

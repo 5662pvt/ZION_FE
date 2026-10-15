@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Empty, Flex, Radio, Space, Tag } from "antd";
+import { Button, Empty, Flex, Radio, Space } from "antd";
 import AddressFormModal from "@/components/account/AddressFormModal";
 import { formatAddress } from "@/utils/address";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { AddressDto } from "@/types/users";
 
 interface AddressSelectorProps {
@@ -38,7 +39,7 @@ export default function AddressSelector({ addresses, selectedId, onSelect }: Add
               value={address.id}
               style={{
                 width: "100%",
-                border: "1px solid #d9d9d9",
+                border: "1px solid var(--color-border)",
                 borderRadius: 8,
                 padding: "12px 16px",
                 margin: 0,
@@ -51,7 +52,7 @@ export default function AddressSelector({ addresses, selectedId, onSelect }: Add
                   </div>
                   <div>{formatAddress(address)}</div>
                 </div>
-                {address.isDefault && <Tag color="green">Mặc định</Tag>}
+                {address.isDefault && <StatusBadge color="var(--color-success)">Mặc định</StatusBadge>}
               </Flex>
             </Radio>
           ))}

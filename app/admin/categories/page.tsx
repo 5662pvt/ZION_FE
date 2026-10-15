@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Alert, Button } from "antd";
+import { Button } from "antd";
 import { useCategoryTree } from "@/hooks/useCategories";
 import { useDeleteCategory } from "@/hooks/useAdminCategories";
 import { toast } from "@/utils/toast";
 import { ApiError } from "@/services/apiClient";
 import CategoryTreeTable from "@/components/admin/categories/CategoryTreeTable";
 import CategoryFormModal from "@/components/admin/categories/CategoryFormModal";
+import PageHeader from "@/components/ui/PageHeader";
+import ErrorState from "@/components/ui/ErrorState";
 import type { CategoryTreeNodeDto } from "@/types/categories";
 
 interface ModalState {
@@ -20,7 +22,7 @@ interface ModalState {
 const CLOSED_MODAL: ModalState = { open: false, mode: "create", category: null, parent: null };
 
 export default function AdminCategoriesPage() {
-  const { data, isLoading, isError, error } = useCategoryTree();
+  const { data, isLoading, isError, error, refetch } = useCategoryTree();
   const deleteMutation = useDeleteCategory();
   const [modal, setModal] = useState<ModalState>(CLOSED_MODAL);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -39,20 +41,23 @@ export default function AdminCategoriesPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h1>Danh mục</h1>
-        <Button type="primary" onClick={() => setModal({ open: true, mode: "create", category: null, parent: null })}>
-          Thêm danh mục
-        </Button>
-      </div>
+      <PageHeader
+        title="Danh mục"
+        description="Quản lý cây danh mục sản phẩm"
+        action={
+          <Button type="primary" onClick={() => setModal({ open: true, mode: "create", category: null, parent: null })}>
+            Thêm danh mục
+          </Button>
+        }
+      />
 
       {isError && (
-        <Alert
-          type="error"
-          showIcon
-          style={{ marginBottom: 16 }}
-          message={error instanceof ApiError ? error.message : "Không tải được danh mục"}
-        />
+        <div style={{ marginBottom: 16 }}>
+          <ErrorState
+            message={error instanceof ApiError ? error.message : "Không tải được danh mục"}
+            onRetry={() => void refetch()}
+          />
+        </div>
       )}
 
       <CategoryTreeTable

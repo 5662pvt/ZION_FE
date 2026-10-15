@@ -1,11 +1,12 @@
 "use client";
 
-import { Button, Card, Image, Popconfirm, Space, Tag, Upload, type UploadProps } from "antd";
+import { Button, Card, Image, Popconfirm, Space, Upload, type UploadProps } from "antd";
 import type { RcFile } from "antd/es/upload/interface";
 import { FiArrowDown, FiArrowUp, FiTrash2 } from "react-icons/fi";
 import { useDeleteProductImage, useReorderProductImages, useUploadProductImage } from "@/hooks/useAdminProducts";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { ProductImageDto } from "@/types/products";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -93,8 +94,8 @@ export default function ProductImageManager({ productId, images }: ProductImageM
             style={{ width: 180 }}
             cover={<Image src={image.url} alt={image.alt ?? ""} height={140} style={{ objectFit: "cover" }} />}
           >
-            {index === 0 && <Tag color="blue">Ảnh chính</Tag>}
-            <div style={{ fontSize: 12, color: "#888", minHeight: 18 }}>{image.alt ?? ""}</div>
+            {index === 0 && <StatusBadge color="var(--color-primary)">Ảnh chính</StatusBadge>}
+            <div style={{ fontSize: 12, color: "var(--color-muted)", minHeight: 18 }}>{image.alt ?? ""}</div>
             <Space style={{ marginTop: 8 }}>
               <Button size="small" icon={<FiArrowUp />} disabled={index === 0} onClick={() => handleMove(index, -1)} />
               <Button

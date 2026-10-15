@@ -18,3 +18,13 @@ export function useProductBySlug(slug: string) {
     enabled: !!slug,
   });
 }
+
+export function useProductSuggest(q: string, limit = 8) {
+  const trimmed = q.trim();
+  return useQuery({
+    queryKey: ["products", "suggest", trimmed, limit] as const,
+    queryFn: () => productsService.suggest(trimmed, limit),
+    enabled: trimmed.length >= 2,
+    placeholderData: (previousData) => previousData,
+  });
+}

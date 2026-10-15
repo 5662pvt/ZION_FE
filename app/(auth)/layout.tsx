@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#f5f5f5",
+        background: "var(--color-page)",
       }}
     >
       <Card style={{ width: 400 }}>{children}</Card>

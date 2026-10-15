@@ -49,7 +49,7 @@ export default function RatingSummary({ summary, loading, selectedRating, onSele
                 cursor: clickable ? "pointer" : "default",
                 padding: "2px 6px",
                 borderRadius: 4,
-                background: active ? "#f0f5ff" : undefined,
+                background: active ? "var(--color-accent)" : undefined,
               }}
               onClick={() => clickable && onSelectRating(active ? undefined : star)}
             >

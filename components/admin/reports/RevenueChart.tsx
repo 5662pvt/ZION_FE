@@ -28,7 +28,7 @@ function RevenueTooltip({ active, payload, label }: TooltipProps<number, string>
   if (!active || !payload || payload.length === 0) return null;
   const point = payload[0].payload as RevenueSeriesPoint;
   return (
-    <div style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 4, padding: 8 }}>
+    <div style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 4, padding: 8 }}>
       <div>Kỳ: {label}</div>
       <div>Doanh thu: {formatVnd(point.revenue)}</div>
       <div>Số đơn hoàn tất: {point.orders}</div>
@@ -50,7 +50,7 @@ export default function RevenueChart({ data, loading, granularity }: RevenueChar
           <XAxis dataKey="bucket" />
           <YAxis tickFormatter={formatCompactVnd} />
           <Tooltip content={<RevenueTooltip />} />
-          <Bar dataKey="revenue" name="Doanh thu" fill="#1677ff" />
+          <Bar dataKey="revenue" name="Doanh thu" fill="#0F9D8A" />
         </BarChart>
       </ResponsiveContainer>
     );
@@ -63,7 +63,7 @@ export default function RevenueChart({ data, loading, granularity }: RevenueChar
         <XAxis dataKey="bucket" />
         <YAxis tickFormatter={formatCompactVnd} />
         <Tooltip content={<RevenueTooltip />} />
-        <Area type="monotone" dataKey="revenue" name="Doanh thu" stroke="#1677ff" fill="#1677ff" fillOpacity={0.2} />
+        <Area type="monotone" dataKey="revenue" name="Doanh thu" stroke="#0F9D8A" fill="#0F9D8A" fillOpacity={0.2} />
       </AreaChart>
     </ResponsiveContainer>
   );

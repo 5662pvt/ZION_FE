@@ -2,9 +2,12 @@
 
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Alert, Input, Select, Space, Spin } from "antd";
+import { Input, Select, Spin } from "antd";
 import AdminReviewTable from "@/components/admin/reviews/AdminReviewTable";
 import { useAdminReviews } from "@/hooks/useAdminReviews";
+import PageHeader from "@/components/ui/PageHeader";
+import ErrorState from "@/components/ui/ErrorState";
+import FilterBar from "@/components/admin/common/FilterBar";
 import type { AdminReviewListParams, ReviewStatus } from "@/types/reviews";
 
 const STATUS_OPTIONS: { value: ReviewStatus; label: string }[] = [
@@ -27,7 +30,7 @@ function AdminReviewsPageContent() {
   const rating = ratingRaw ? Number(ratingRaw) : undefined;
 
   const params: AdminReviewListParams = { page, pageSize, keyword, status, rating };
-  const { data, isLoading, isError } = useAdminReviews(params);
+  const { data, isLoading, isError, refetch } = useAdminReviews(params);
 
   function updateParams(next: Record<string, string | undefined>) {
     const sp = new URLSearchParams(searchParams.toString());
@@ -41,8 +44,9 @@ function AdminReviewsPageContent() {
 
   return (
     <div>
-      <h1>Đánh giá sản phẩm</h1>
-      <Space style={{ marginBottom: 16 }} wrap>
+      <PageHeader title="Đánh giá sản phẩm" description="Kiểm duyệt đánh giá sản phẩm" />
+
+      <FilterBar>
         <Input.Search
           allowClear
           placeholder="Tên sản phẩm / tác giả / nội dung"
@@ -66,10 +70,10 @@ function AdminReviewsPageContent() {
           options={RATING_OPTIONS}
           onChange={(value) => updateParams({ rating: value ? String(value) : undefined })}
         />
-      </Space>
+      </FilterBar>
 
       {isError ? (
-        <Alert type="error" message="Không tải được danh sách đánh giá" />
+        <ErrorState message="Không tải được danh sách đánh giá" onRetry={() => void refetch()} />
       ) : (
         <AdminReviewTable
           items={data?.items ?? []}

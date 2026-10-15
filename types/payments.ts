@@ -1,5 +1,7 @@
 export type PaymentIntentStatus = "Pending" | "Succeeded" | "Failed" | "Cancelled";
 
+export type PaymentChannel = "Card" | "EWallet" | "BankTransfer";
+
 export interface PaymentIntentDto {
   paymentId: string;
   intentId: string;
@@ -7,6 +9,7 @@ export interface PaymentIntentDto {
   status: PaymentIntentStatus;
   amount: number;
   currency: string;
+  channel: PaymentChannel;
   redirectUrl: string | null;
   expiresAt: string;
 }

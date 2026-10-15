@@ -8,6 +8,7 @@ import { ROLES } from "@/constants/roles";
 import { useReportsDashboard } from "@/hooks/useReports";
 import KpiCard from "@/components/admin/reports/KpiCard";
 import CurrentValueCard from "@/components/admin/reports/CurrentValueCard";
+import PageHeader from "@/components/ui/PageHeader";
 
 function AdminKpiRow() {
   const to = dayjs().format("YYYY-MM-DD");
@@ -46,15 +47,12 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      {isAdmin && (
-        <>
-          <div style={{ marginBottom: 16 }}>
-            <Link href="/admin/reports">Xem báo cáo →</Link>
-          </div>
-          <AdminKpiRow />
-        </>
-      )}
+      <PageHeader
+        title="Dashboard"
+        description="Tổng quan hoạt động cửa hàng"
+        action={isAdmin ? <Link href="/admin/reports">Xem báo cáo →</Link> : undefined}
+      />
+      {isAdmin && <AdminKpiRow />}
       <Row gutter={16}>
         <Col xs={24} sm={12} md={8}>
           <Link href="/admin/products">

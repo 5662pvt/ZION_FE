@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, Tag, Typography, type TableProps } from "antd";
+import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, Typography, type TableProps } from "antd";
 import { useAddCoupon, useDeactivateCoupon, useGenerateCoupons } from "@/hooks/useAdminPromotions";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
+import { CouponStatusBadge } from "@/components/ui/StatusBadge";
 import type { CouponDto } from "@/types/promotions";
 
 interface CouponManagerProps {
@@ -86,7 +87,7 @@ export default function CouponManager({ promotionId, coupons }: CouponManagerPro
     {
       title: "Trạng thái",
       dataIndex: "isActive",
-      render: (isActive: boolean) => <Tag color={isActive ? "green" : "default"}>{isActive ? "Hoạt động" : "Vô hiệu"}</Tag>,
+      render: (isActive: boolean) => <CouponStatusBadge isActive={isActive} />,
     },
     { title: "Lượt dùng", dataIndex: "usedCount" },
     {

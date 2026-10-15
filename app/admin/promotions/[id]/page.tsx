@@ -1,27 +1,14 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Alert, Button, Popconfirm, Space, Spin, Tag, Typography } from "antd";
+import { Alert, Button, Popconfirm, Space, Spin, Typography } from "antd";
 import PromotionForm from "@/components/admin/promotions/PromotionForm";
 import CouponManager from "@/components/admin/promotions/CouponManager";
 import { useActivatePromotion, useAdminPromotion, useDeactivatePromotion } from "@/hooks/useAdminPromotions";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
-import type { PromotionStatus } from "@/types/promotions";
-
-const STATUS_COLOR: Record<PromotionStatus, string> = {
-  Active: "green",
-  Inactive: "default",
-  Scheduled: "blue",
-  Expired: "red",
-};
-
-const STATUS_LABEL: Record<PromotionStatus, string> = {
-  Active: "Đang chạy",
-  Inactive: "Tạm tắt",
-  Scheduled: "Sắp diễn ra",
-  Expired: "Hết hạn",
-};
+import { PromotionStatusBadge } from "@/components/ui/StatusBadge";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function PromotionDetailPage() {
   const params = useParams<{ id: string }>();
@@ -49,25 +36,29 @@ export default function PromotionDetailPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, width: "100%", justifyContent: "space-between" }} wrap>
-        <Space>
-          <h1 style={{ margin: 0 }}>{promotion.name}</h1>
-          <Tag color={STATUS_COLOR[promotion.status]}>{STATUS_LABEL[promotion.status]}</Tag>
-        </Space>
-        {promotion.isActive ? (
-          <Popconfirm title="Tắt khuyến mãi này?" onConfirm={handleDeactivate}>
-            <Button danger loading={deactivateMutation.isPending}>
-              Tắt
-            </Button>
-          </Popconfirm>
-        ) : (
-          <Popconfirm title="Bật khuyến mãi này?" onConfirm={handleActivate}>
-            <Button type="primary" loading={activateMutation.isPending}>
-              Bật
-            </Button>
-          </Popconfirm>
-        )}
-      </Space>
+      <PageHeader
+        title={
+          <Space>
+            {promotion.name}
+            <PromotionStatusBadge status={promotion.status} />
+          </Space>
+        }
+        action={
+          promotion.isActive ? (
+            <Popconfirm title="Tắt khuyến mãi này?" onConfirm={handleDeactivate}>
+              <Button danger loading={deactivateMutation.isPending}>
+                Tắt
+              </Button>
+            </Popconfirm>
+          ) : (
+            <Popconfirm title="Bật khuyến mãi này?" onConfirm={handleActivate}>
+              <Button type="primary" loading={activateMutation.isPending}>
+                Bật
+              </Button>
+            </Popconfirm>
+          )
+        }
+      />
 
       <PromotionForm mode="edit" promotion={promotion} />
 

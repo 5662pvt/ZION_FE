@@ -1,24 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Alert, Button, Popconfirm, Space, Spin, Tag } from "antd";
+import { Alert, Button, Popconfirm, Space, Spin } from "antd";
 import ProductForm from "@/components/admin/products/ProductForm";
 import ProductImageManager from "@/components/admin/products/ProductImageManager";
 import { useAdminProduct, useArchiveProduct, usePublishProduct } from "@/hooks/useAdminProducts";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
-
-const STATUS_LABEL: Record<string, string> = {
-  Draft: "Nháp",
-  Published: "Đã xuất bản",
-  Archived: "Lưu trữ",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  Draft: "default",
-  Published: "green",
-  Archived: "red",
-};
+import { ProductStatusBadge } from "@/components/ui/StatusBadge";
+import PageHeader from "@/components/ui/PageHeader";
+import type { ProductStatus } from "@/types/products";
 
 export default function EditProductPage() {
   const params = useParams<{ id: string }>();
@@ -46,24 +37,28 @@ export default function EditProductPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, width: "100%", justifyContent: "space-between" }} wrap>
-        <Space>
-          <h1 style={{ margin: 0 }}>Sửa sản phẩm</h1>
-          <Tag color={STATUS_COLOR[product.status] ?? "default"}>{STATUS_LABEL[product.status] ?? product.status}</Tag>
-        </Space>
-        <Space>
-          {product.status !== "Published" && (
-            <Popconfirm title="Xuất bản sản phẩm này?" onConfirm={handlePublish}>
-              <Button type="primary">Publish</Button>
-            </Popconfirm>
-          )}
-          {product.status !== "Archived" && (
-            <Popconfirm title="Lưu trữ sản phẩm này?" onConfirm={handleArchive}>
-              <Button danger>Archive</Button>
-            </Popconfirm>
-          )}
-        </Space>
-      </Space>
+      <PageHeader
+        title={
+          <Space>
+            Sửa sản phẩm
+            <ProductStatusBadge status={product.status as ProductStatus} />
+          </Space>
+        }
+        action={
+          <Space>
+            {product.status !== "Published" && (
+              <Popconfirm title="Xuất bản sản phẩm này?" onConfirm={handlePublish}>
+                <Button type="primary">Xuất bản</Button>
+              </Popconfirm>
+            )}
+            {product.status !== "Archived" && (
+              <Popconfirm title="Lưu trữ sản phẩm này?" onConfirm={handleArchive}>
+                <Button danger>Lưu trữ</Button>
+              </Popconfirm>
+            )}
+          </Space>
+        }
+      />
 
       <ProductForm mode="edit" product={product} />
 
