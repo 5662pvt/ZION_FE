@@ -5,11 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb, Button, Drawer, Dropdown, Layout, Menu, type MenuProps } from "antd";
 import {
+  FiActivity,
+  FiAlertTriangle,
   FiBarChart2,
   FiBox,
   FiChevronDown,
   FiExternalLink,
   FiHome,
+  FiInbox,
   FiLayers,
   FiLogOut,
   FiMenu,
@@ -72,6 +75,15 @@ const NAV_GROUPS: NavGroup[] = [
       { key: "reviews", href: "/admin/reviews", icon: <FiStar />, label: "Đánh giá" },
     ],
   },
+  {
+    key: "system",
+    label: "Hệ thống",
+    items: [
+      { key: "system-health", href: "/admin/system/health", icon: <FiActivity />, label: "Sức khoẻ hệ thống", adminOnly: true },
+      { key: "system-messages", href: "/admin/system/messages", icon: <FiInbox />, label: "Outbox / Inbox", adminOnly: true },
+      { key: "system-dlq", href: "/admin/system/dlq", icon: <FiAlertTriangle />, label: "Hàng đợi lỗi (DLQ)", adminOnly: true },
+    ],
+  },
 ];
 
 function resolveSelectedKey(pathname: string, entries: NavEntry[]): string {
@@ -81,18 +93,20 @@ function resolveSelectedKey(pathname: string, entries: NavEntry[]): string {
 }
 
 function buildMenuItems(groups: NavGroup[], isAdmin: boolean): MenuProps["items"] {
-  return groups.map((group) => ({
-    key: group.key,
-    type: "group",
-    label: group.label,
-    children: group.items
-      .filter((entry) => isAdmin || !entry.adminOnly)
-      .map((entry) => ({
-        key: entry.key,
-        icon: entry.icon,
-        label: <Link href={entry.href}>{entry.label}</Link>,
-      })),
-  }));
+  return groups
+    .map((group) => ({
+      key: group.key,
+      type: "group" as const,
+      label: group.label,
+      children: group.items
+        .filter((entry) => isAdmin || !entry.adminOnly)
+        .map((entry) => ({
+          key: entry.key,
+          icon: entry.icon,
+          label: <Link href={entry.href}>{entry.label}</Link>,
+        })),
+    }))
+    .filter((group) => group.children.length > 0);
 }
 
 function AdminShell({ children }: { children: ReactNode }) {

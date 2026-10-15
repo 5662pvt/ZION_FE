@@ -5,6 +5,7 @@ import type { AdminOrderListParams } from "@/types/adminOrders";
 import type { PromotionListParams } from "@/types/promotions";
 import type { AdminReviewListParams, ReviewListParams } from "@/types/reviews";
 import type { ReportDateRangeParams, TopCategoriesParams, TopProductsParams } from "@/types/reports";
+import type { InboxListParams, OutboxListParams } from "@/types/system";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -56,5 +57,13 @@ export const queryKeys = {
     topProducts: (params: TopProductsParams) => ["reports", "topProducts", params] as const,
     topCategories: (params: TopCategoriesParams) => ["reports", "topCategories", params] as const,
     promotions: (params: ReportDateRangeParams) => ["reports", "promotions", params] as const,
+  },
+  system: {
+    modules: ["system", "modules"] as const,
+    health: ["system", "health"] as const,
+    outboxList: (filters: OutboxListParams) => ["system", "outbox", "list", filters] as const,
+    outboxDetail: (module: string, id: string) => ["system", "outbox", "detail", module, id] as const,
+    inboxList: (filters: InboxListParams) => ["system", "inbox", "list", filters] as const,
+    dlq: (limit: number) => ["system", "dlq", limit] as const,
   },
 };

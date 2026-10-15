@@ -4,6 +4,7 @@ import type { OrderStatus } from "@/types/orders";
 import type { PromotionStatus } from "@/types/promotions";
 import type { ProductStatus } from "@/types/products";
 import type { ReviewStatus } from "@/types/reviews";
+import type { HealthStatus, OutboxStatus } from "@/types/system";
 
 interface StatusBadgeProps {
   color: string;
@@ -87,6 +88,28 @@ const STOCK_LEVEL: Record<StockLevel, { label: string; color: string }> = {
 
 export function StockLevelBadge({ level }: { level: StockLevel }) {
   const entry = STOCK_LEVEL[level];
+  return <StatusBadge color={entry.color}>{entry.label}</StatusBadge>;
+}
+
+const OUTBOX_STATUS: Record<OutboxStatus, { label: string; color: string }> = {
+  Pending: { label: "Đang chờ", color: "var(--color-warning)" },
+  Failed: { label: "Thất bại", color: "var(--color-danger)" },
+  Processed: { label: "Đã gửi", color: "var(--color-success)" },
+};
+
+export function OutboxStatusBadge({ status }: { status: OutboxStatus }) {
+  const entry = OUTBOX_STATUS[status];
+  return <StatusBadge color={entry.color}>{entry.label}</StatusBadge>;
+}
+
+const HEALTH_STATUS: Record<HealthStatus, { label: string; color: string }> = {
+  Healthy: { label: "Hoạt động", color: "var(--color-success)" },
+  Degraded: { label: "Suy giảm", color: "var(--color-warning)" },
+  Unhealthy: { label: "Lỗi", color: "var(--color-danger)" },
+};
+
+export function HealthStatusBadge({ status }: { status: HealthStatus }) {
+  const entry = HEALTH_STATUS[status];
   return <StatusBadge color={entry.color}>{entry.label}</StatusBadge>;
 }
 

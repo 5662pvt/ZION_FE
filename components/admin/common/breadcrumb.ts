@@ -11,6 +11,13 @@ const SECTION_LABELS: Record<string, string> = {
   promotions: "Khuyến mãi",
   reviews: "Đánh giá",
   reports: "Báo cáo",
+  system: "Hệ thống",
+};
+
+const SYSTEM_LABELS: Record<string, string> = {
+  health: "Sức khoẻ hệ thống",
+  messages: "Outbox / Inbox",
+  dlq: "Hàng đợi lỗi (DLQ)",
 };
 
 export function resolveBreadcrumb(pathname: string): BreadcrumbItem[] {
@@ -26,6 +33,12 @@ export function resolveBreadcrumb(pathname: string): BreadcrumbItem[] {
   const sectionHref = `/admin/${section}`;
   if (rest.length === 0) {
     items.push({ label: sectionLabel });
+    return items;
+  }
+
+  if (section === "system") {
+    items.push({ label: sectionLabel });
+    items.push({ label: SYSTEM_LABELS[rest[0]] ?? sectionLabel });
     return items;
   }
 
