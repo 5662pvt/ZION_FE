@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Select } from "antd";
 import { useInboxList, useSystemModules } from "@/hooks/useSystem";
@@ -18,6 +19,18 @@ export default function InboxPanel() {
 
   const { data: modules } = useSystemModules();
   const { data, isLoading, isError, refetch } = useInboxList({ module: moduleFilter, page, pageSize });
+
+  // Deep links (eg. from docs/alerts) use a plain `module` param — alias it onto ibModule.
+  useEffect(() => {
+    const aliasModule = searchParams.get("module");
+    if (!aliasModule) return;
+
+    const sp = new URLSearchParams(searchParams.toString());
+    sp.delete("module");
+    sp.set("ibModule", aliasModule);
+    if (!sp.has("ibPage")) sp.set("ibPage", "1");
+    router.replace(`${pathname}?${sp.toString()}`);
+  }, [searchParams, router, pathname]);
 
   function updateParams(next: Record<string, string | undefined>) {
     const sp = new URLSearchParams(searchParams.toString());

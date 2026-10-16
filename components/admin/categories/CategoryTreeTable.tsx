@@ -1,7 +1,11 @@
 "use client";
 
-import { Button, Popconfirm, Space, Table, type TableColumnsType } from "antd";
+import { Button, Popconfirm, Skeleton, Space, Table, type TableColumnsType } from "antd";
+import type { ReactNode } from "react";
+import EmptyState from "@/components/ui/EmptyState";
+import ListCard from "@/components/admin/common/ListCard";
 import type { CategoryTreeNodeDto } from "@/types/categories";
+import styles from "./CategoryTreeTable.module.css";
 
 interface CategoryTreeTableProps {
   data: CategoryTreeNodeDto[];
@@ -54,14 +58,69 @@ export default function CategoryTreeTable({ data, loading, deletingId, onEdit, o
     },
   ];
 
+  function renderNode(category: CategoryTreeNodeDto, depth: number): ReactNode {
+    return (
+      <div key={category.id}>
+        <ListCard
+          title={category.name}
+          fields={[
+            { label: "Slug", value: category.slug },
+            { label: "Thứ tự", value: category.displayOrder },
+          ]}
+          action={
+            <Space wrap>
+              <Button size="small" onClick={() => onAddChild(category)}>
+                Thêm danh mục con
+              </Button>
+              <Button size="small" onClick={() => onEdit(category)}>
+                Sửa
+              </Button>
+              <Popconfirm
+                title="Xóa danh mục"
+                description="Bạn có chắc muốn xóa danh mục này?"
+                okText="Xóa"
+                cancelText="Hủy"
+                onConfirm={() => onDelete(category)}
+              >
+                <Button size="small" danger loading={deletingId === category.id}>
+                  Xóa
+                </Button>
+              </Popconfirm>
+            </Space>
+          }
+        />
+        {category.children.length > 0 && (
+          <div className={styles.childList}>{category.children.map((child) => renderNode(child, depth + 1))}</div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <Table
-      rowKey="id"
-      columns={columns}
-      dataSource={mapTreeData(data)}
-      loading={loading}
-      pagination={false}
-      locale={{ emptyText: "Chưa có danh mục nào" }}
-    />
+    <>
+      <div className={styles.tableView}>
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={mapTreeData(data)}
+          loading={loading}
+          pagination={false}
+          locale={{ emptyText: "Chưa có danh mục nào" }}
+        />
+      </div>
+      <div className={styles.cardView}>
+        {loading ? (
+          <Space direction="vertical" size={12} style={{ width: "100%" }}>
+            <Skeleton active paragraph={{ rows: 2 }} />
+            <Skeleton active paragraph={{ rows: 2 }} />
+            <Skeleton active paragraph={{ rows: 2 }} />
+          </Space>
+        ) : data.length === 0 ? (
+          <EmptyState description="Chưa có danh mục nào" />
+        ) : (
+          <div className={styles.nodeList}>{data.map((category) => renderNode(category, 0))}</div>
+        )}
+      </div>
+    </>
   );
 }

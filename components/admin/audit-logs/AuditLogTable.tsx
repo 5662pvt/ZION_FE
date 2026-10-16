@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dayjs from "dayjs";
-import { Button, Tag, type TableProps } from "antd";
+import { Button, Tag, Tooltip, type TableProps } from "antd";
 import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
 import ListCard from "@/components/admin/common/ListCard";
 import type { AuditAction, AuditLogDto } from "@/types/auditLogs";
@@ -65,15 +65,32 @@ function renderResource(record: AuditLogDto) {
 
 export default function AuditLogTable({ items, loading, pagination, onPageChange, onView }: AuditLogTableProps) {
   const columns: TableProps<AuditLogDto>["columns"] = [
-    { title: "Thời điểm", dataIndex: "occurredAt", render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm:ss") },
-    { title: "Người thực hiện", dataIndex: "actorEmail" },
-    { title: "Hành động", dataIndex: "action", render: (value: AuditLogDto["action"]) => <Tag>{auditActionLabel(value)}</Tag> },
-    { title: "Đối tượng", key: "resource", render: (_, record) => renderResource(record) },
-    { title: "HTTP", dataIndex: "statusCode" },
-    { title: "IP", dataIndex: "ipAddress" },
+    {
+      title: "Thời điểm",
+      dataIndex: "occurredAt",
+      width: 160,
+      render: (value: string) => <span style={{ whiteSpace: "nowrap" }}>{dayjs(value).format("DD/MM/YYYY HH:mm:ss")}</span>,
+    },
+    {
+      title: "Người thực hiện",
+      dataIndex: "actorEmail",
+      ellipsis: true,
+      render: (value: string) => <Tooltip title={value}>{value}</Tooltip>,
+    },
+    {
+      title: "Hành động",
+      dataIndex: "action",
+      width: 160,
+      render: (value: AuditLogDto["action"]) => <Tag>{auditActionLabel(value)}</Tag>,
+    },
+    { title: "Đối tượng", key: "resource", width: 160, ellipsis: true, render: (_, record) => renderResource(record) },
+    { title: "HTTP", dataIndex: "statusCode", width: 70 },
+    { title: "IP", dataIndex: "ipAddress", width: 120 },
     {
       title: "Thao tác",
       key: "actions",
+      fixed: "right",
+      width: 110,
       render: (_, record) => (
         <Button size="small" onClick={() => onView(record)}>
           Chi tiết
@@ -88,6 +105,7 @@ export default function AuditLogTable({ items, loading, pagination, onPageChange
       loading={loading}
       dataSource={items}
       columns={columns}
+      scrollX={890}
       emptyText="Chưa có nhật ký thao tác"
       pagination={pagination}
       onPageChange={onPageChange}

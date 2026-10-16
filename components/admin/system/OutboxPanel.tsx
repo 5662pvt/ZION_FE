@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, Popconfirm, Select } from "antd";
 import { ApiError } from "@/services/apiClient";
@@ -32,6 +32,25 @@ export default function OutboxPanel() {
   const { data: modules } = useSystemModules();
   const { data, isLoading, isError, refetch } = useOutboxList({ module: moduleFilter, status, page, pageSize });
   const retryAllFailed = useRetryAllFailed();
+
+  // Deep links (eg. from docs/alerts) use plain `status`/`module` params — alias them onto obStatus/obModule.
+  useEffect(() => {
+    const aliasStatus = searchParams.get("status");
+    const aliasModule = searchParams.get("module");
+    if (!aliasStatus && !aliasModule) return;
+
+    const sp = new URLSearchParams(searchParams.toString());
+    if (aliasStatus) {
+      sp.delete("status");
+      sp.set("obStatus", aliasStatus);
+    }
+    if (aliasModule) {
+      sp.delete("module");
+      sp.set("obModule", aliasModule);
+    }
+    if (!sp.has("obPage")) sp.set("obPage", "1");
+    router.replace(`${pathname}?${sp.toString()}`);
+  }, [searchParams, router, pathname]);
 
   function updateParams(next: Record<string, string | undefined>) {
     const sp = new URLSearchParams(searchParams.toString());

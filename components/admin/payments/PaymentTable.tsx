@@ -24,30 +24,51 @@ interface PaymentTableProps {
 
 export default function PaymentTable({ items, loading, pagination, onPageChange }: PaymentTableProps) {
   const columns: TableProps<AdminPaymentDto>["columns"] = [
-    { title: "Thời điểm", dataIndex: "createdAt", render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm:ss") },
+    {
+      title: "Thời điểm",
+      dataIndex: "createdAt",
+      width: 160,
+      render: (value: string) => <span style={{ whiteSpace: "nowrap" }}>{dayjs(value).format("DD/MM/YYYY HH:mm:ss")}</span>,
+    },
     {
       title: "Mã đơn",
       dataIndex: "orderId",
+      width: 90,
       render: (orderId: string) => <Link href={`/admin/orders/${orderId}`}>{orderId.slice(0, 8)}</Link>,
     },
-    { title: "Số tiền", dataIndex: "amount", render: (value: number) => formatVnd(value) },
-    { title: "Kênh", dataIndex: "channel", render: (channel: AdminPaymentDto["channel"]) => CHANNEL_LABELS[channel] },
-    { title: "Nhà cung cấp", dataIndex: "provider" },
+    { title: "Số tiền", dataIndex: "amount", width: 110, render: (value: number) => formatVnd(value) },
+    {
+      title: "Kênh",
+      dataIndex: "channel",
+      width: 100,
+      render: (channel: AdminPaymentDto["channel"]) => CHANNEL_LABELS[channel],
+    },
+    {
+      title: "Nhà cung cấp",
+      dataIndex: "provider",
+      ellipsis: true,
+      render: (value: string) => <Tooltip title={value}>{value}</Tooltip>,
+    },
     {
       title: "Trạng thái",
       dataIndex: "status",
+      width: 100,
       render: (status: AdminPaymentDto["status"]) => <PaymentStatusBadge status={status} />,
     },
     {
       title: "Lý do lỗi",
       dataIndex: "failureReason",
+      width: 150,
       ellipsis: true,
       render: (value: string | null) => (value ? <Tooltip title={value}>{value}</Tooltip> : "—"),
     },
     {
       title: "Hoàn tất lúc",
       dataIndex: "completedAt",
-      render: (value: string | null) => (value ? dayjs(value).format("DD/MM/YYYY HH:mm:ss") : "—"),
+      width: 160,
+      render: (value: string | null) => (
+        <span style={{ whiteSpace: "nowrap" }}>{value ? dayjs(value).format("DD/MM/YYYY HH:mm:ss") : "—"}</span>
+      ),
     },
   ];
 
@@ -57,6 +78,7 @@ export default function PaymentTable({ items, loading, pagination, onPageChange 
       loading={loading}
       dataSource={items}
       columns={columns}
+      scrollX={970}
       emptyText="Chưa có giao dịch thanh toán"
       pagination={pagination}
       onPageChange={onPageChange}

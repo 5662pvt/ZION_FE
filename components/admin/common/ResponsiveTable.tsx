@@ -20,6 +20,8 @@ interface ResponsiveTableProps<T> {
   onPageChange: (page: number, pageSize: number) => void;
   emptyText: string;
   renderCard: (record: T) => ReactNode;
+  /** Minimum table width (px) before horizontal scroll kicks in — a fallback for narrow desktop widths. */
+  scrollX?: number;
 }
 
 function getKey<T>(record: T, rowKey: ResponsiveTableProps<T>["rowKey"]): Key {
@@ -35,6 +37,7 @@ export default function ResponsiveTable<T extends object>({
   onPageChange,
   emptyText,
   renderCard,
+  scrollX,
 }: ResponsiveTableProps<T>) {
   return (
     <>
@@ -44,6 +47,7 @@ export default function ResponsiveTable<T extends object>({
           loading={loading}
           dataSource={dataSource}
           columns={columns}
+          scroll={scrollX ? { x: scrollX } : undefined}
           locale={{ emptyText }}
           pagination={{
             current: pagination.current,

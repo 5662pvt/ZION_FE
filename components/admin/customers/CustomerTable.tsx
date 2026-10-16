@@ -1,8 +1,8 @@
 "use client";
 
 import dayjs from "dayjs";
-import { Button, Popconfirm, Space, Tag, type TableProps } from "antd";
-import { FiCheck, FiLock } from "react-icons/fi";
+import { Button, Popconfirm, Space, Tag, Tooltip, type TableProps } from "antd";
+import { FiCheck, FiCheckCircle, FiEye, FiLock, FiXCircle } from "react-icons/fi";
 import ResponsiveTable from "@/components/admin/common/ResponsiveTable";
 import ListCard from "@/components/admin/common/ListCard";
 import { CustomerStatusBadge } from "@/components/ui/StatusBadge";
@@ -21,6 +21,13 @@ interface CustomerTableProps {
   unlockPending: boolean;
 }
 
+const ellipsisTextStyle = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  minWidth: 0,
+} as const;
+
 export default function CustomerTable({
   items,
   loading,
@@ -36,9 +43,9 @@ export default function CustomerTable({
   function renderActions(record: AdminCustomerSummaryDto) {
     const isSelf = record.id === currentUserId;
     return (
-      <Space>
-        <Button size="small" onClick={() => onView(record)}>
-          Xem chi tiết
+      <Space size={4} style={{ flexWrap: "nowrap" }}>
+        <Button size="small" icon={<FiEye aria-hidden />} onClick={() => onView(record)}>
+          Chi tiết
         </Button>
         {!isSelf &&
           (record.isActive ? (
@@ -59,12 +66,52 @@ export default function CustomerTable({
   }
 
   const columns: TableProps<AdminCustomerSummaryDto>["columns"] = [
-    { title: "Email", dataIndex: "email" },
-    { title: "Tên", dataIndex: "displayName", render: (value: string | null) => value ?? "—" },
-    { title: "SĐT", dataIndex: "phoneNumber", render: (value: string | null) => value ?? "—" },
+    {
+      title: "Email",
+      dataIndex: "email",
+      width: 180,
+      render: (value: string, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+          <Tooltip title={value}>
+            <span style={{ ...ellipsisTextStyle, flex: "1 1 auto" }}>{value}</span>
+          </Tooltip>
+          <Tooltip title={record.emailConfirmed ? "Đã xác thực email" : "Chưa xác thực email"}>
+            <span style={{ flexShrink: 0, display: "inline-flex" }}>
+              {record.emailConfirmed ? (
+                <FiCheckCircle color="var(--color-success)" aria-hidden />
+              ) : (
+                <FiXCircle color="var(--color-danger)" aria-hidden />
+              )}
+            </span>
+          </Tooltip>
+        </div>
+      ),
+    },
+    {
+      title: "Tên",
+      dataIndex: "displayName",
+      width: 110,
+      render: (value: string | null) =>
+        value ? (
+          <Tooltip title={value}>
+            <span style={{ ...ellipsisTextStyle, display: "block" }}>{value}</span>
+          </Tooltip>
+        ) : (
+          "—"
+        ),
+    },
+    {
+      title: "SĐT",
+      dataIndex: "phoneNumber",
+      width: 110,
+      render: (value: string | null) => (
+        <span style={{ whiteSpace: "nowrap" }}>{value ?? "—"}</span>
+      ),
+    },
     {
       title: "Vai trò",
       dataIndex: "roles",
+      width: 100,
       render: (roles: string[]) => (
         <Space size={4} wrap>
           {roles.map((role) => (
@@ -76,20 +123,24 @@ export default function CustomerTable({
     {
       title: "Trạng thái",
       dataIndex: "isActive",
+      width: 80,
       render: (isActive: boolean) => <CustomerStatusBadge isActive={isActive} />,
     },
     {
-      title: "Xác thực email",
-      dataIndex: "emailConfirmed",
-      render: (value: boolean) => (value ? "Đã xác thực" : "Chưa xác thực"),
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      width: 130,
+      render: (value: string) => <span style={{ whiteSpace: "nowrap" }}>{dayjs(value).format("DD/MM/YYYY HH:mm")}</span>,
     },
-    { title: "Ngày tạo", dataIndex: "createdAt", render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm") },
     {
       title: "Đăng nhập gần nhất",
       dataIndex: "lastLoginAt",
-      render: (value: string | null) => (value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "—"),
+      width: 135,
+      render: (value: string | null) => (
+        <span style={{ whiteSpace: "nowrap" }}>{value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "—"}</span>
+      ),
     },
-    { title: "Thao tác", key: "actions", render: (_, record) => renderActions(record) },
+    { title: "Thao tác", key: "actions", fixed: "right", width: 200, render: (_, record) => renderActions(record) },
   ];
 
   return (
@@ -98,6 +149,7 @@ export default function CustomerTable({
       loading={loading}
       dataSource={items}
       columns={columns}
+      scrollX={1045}
       emptyText="Chưa có khách hàng"
       pagination={pagination}
       onPageChange={onPageChange}
