@@ -70,3 +70,21 @@ export interface AdminReviewListParams {
 export interface HideReviewRequest {
   reason?: string;
 }
+
+export interface MyReviewDto {
+  id: string;
+  productId: string;
+  productName: string;
+  productSlug: string | null;
+  rating: number;
+  title: string | null;
+  content: string;
+  status: ReviewStatus;
+  hiddenReason: string | null;
+  createdAt: string;
+}
+
+export interface MyReviewsParams {
+  page?: number;
+  pageSize?: number;
+}

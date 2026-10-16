@@ -12,6 +12,9 @@ const SECTION_LABELS: Record<string, string> = {
   reviews: "Đánh giá",
   reports: "Báo cáo",
   system: "Hệ thống",
+  customers: "Khách hàng",
+  payments: "Thanh toán",
+  "audit-logs": "Nhật ký thao tác",
 };
 
 const SYSTEM_LABELS: Record<string, string> = {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button, Card, Image } from "antd";
 import { FiShoppingCart } from "react-icons/fi";
 import StarRating from "@/components/shop/reviews/StarRating";
+import WishlistButton from "@/components/shop/product/WishlistButton";
 import Price from "@/components/ui/Price";
 import { StockLevelBadge } from "@/components/ui/StatusBadge";
 import { useAddToCart } from "@/hooks/useCart";
@@ -61,6 +62,9 @@ export default function ProductCard({ product, inStock, rating, reviewCount }: P
                 <StockLevelBadge level={outOfStock ? "OutOfStock" : "InStock"} />
               </div>
             )}
+            <div style={{ position: "absolute", top: 8, right: 8 }}>
+              <WishlistButton productId={product.id} size="small" />
+            </div>
             <Button
               shape="circle"
               icon={<FiShoppingCart aria-hidden />}

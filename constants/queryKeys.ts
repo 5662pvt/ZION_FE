@@ -3,9 +3,14 @@ import type { MyOrdersParams } from "@/types/orders";
 import type { InventoryListParams, StockMovementsParams } from "@/types/inventory";
 import type { AdminOrderListParams } from "@/types/adminOrders";
 import type { PromotionListParams } from "@/types/promotions";
-import type { AdminReviewListParams, ReviewListParams } from "@/types/reviews";
+import type { AdminReviewListParams, MyReviewsParams, ReviewListParams } from "@/types/reviews";
 import type { ReportDateRangeParams, TopCategoriesParams, TopProductsParams } from "@/types/reports";
 import type { InboxListParams, OutboxListParams } from "@/types/system";
+import type { AdminCustomerListParams } from "@/types/adminCustomers";
+import type { AdminPaymentListParams } from "@/types/adminPayments";
+import type { AuditLogListParams } from "@/types/auditLogs";
+import type { WishlistParams } from "@/types/users";
+import type { MyNotificationsParams } from "@/types/notifications";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -51,6 +56,14 @@ export const queryKeys = {
     summaries: (productIds: string[]) => ["reviews", "summaries", productIds] as const,
     eligibility: (productId: string) => ["reviews", "eligibility", productId] as const,
     adminList: (filters: AdminReviewListParams) => ["reviews", "admin", "list", filters] as const,
+    mine: (params: MyReviewsParams) => ["reviews", "mine", params] as const,
+  },
+  wishlist: {
+    ids: ["wishlist", "ids"] as const,
+    list: (params: WishlistParams) => ["wishlist", "list", params] as const,
+  },
+  notifications: {
+    mine: (params: MyNotificationsParams) => ["notifications", "mine", params] as const,
   },
   reports: {
     dashboard: (params: ReportDateRangeParams) => ["reports", "dashboard", params] as const,
@@ -65,5 +78,15 @@ export const queryKeys = {
     outboxDetail: (module: string, id: string) => ["system", "outbox", "detail", module, id] as const,
     inboxList: (filters: InboxListParams) => ["system", "inbox", "list", filters] as const,
     dlq: (limit: number) => ["system", "dlq", limit] as const,
+  },
+  adminCustomers: {
+    list: (filters: AdminCustomerListParams) => ["customers", "admin", "list", filters] as const,
+    detail: (id: string) => ["customers", "admin", "detail", id] as const,
+  },
+  adminPayments: {
+    list: (filters: AdminPaymentListParams) => ["payments", "admin", "list", filters] as const,
+  },
+  auditLogs: {
+    list: (filters: AuditLogListParams) => ["audit-logs", "list", filters] as const,
   },
 };

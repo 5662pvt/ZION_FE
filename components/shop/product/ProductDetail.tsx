@@ -7,6 +7,7 @@ import { FiRefreshCw, FiTruck } from "react-icons/fi";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import StickyBuyBar from "@/components/shop/product/StickyBuyBar";
 import ProductTabs from "@/components/shop/product/ProductTabs";
+import WishlistButton from "@/components/shop/product/WishlistButton";
 import { useAddToCart } from "@/hooks/useCart";
 import { useProductAvailability } from "@/hooks/useAvailability";
 import { toast } from "@/utils/toast";
@@ -92,16 +93,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       )}
 
       <div style={{ marginBottom: 24 }}>
-        <AddToCartButton
-          quantity={quantity}
-          onQuantityChange={setQuantity}
-          max={available}
-          outOfStock={outOfStock}
-          isAdding={isAdding}
-          isBuyingNow={isBuyingNow}
-          onAdd={handleAdd}
-          onBuyNow={handleBuyNow}
-        />
+        <Space align="start" size={12}>
+          <AddToCartButton
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            max={available}
+            outOfStock={outOfStock}
+            isAdding={isAdding}
+            isBuyingNow={isBuyingNow}
+            onAdd={handleAdd}
+            onBuyNow={handleBuyNow}
+          />
+          <WishlistButton productId={product.id} size="large" />
+        </Space>
       </div>
 
       <Space direction="vertical" size={4} style={{ marginBottom: 32 }}>

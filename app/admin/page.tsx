@@ -8,6 +8,8 @@ import { ROLES } from "@/constants/roles";
 import { useReportsDashboard } from "@/hooks/useReports";
 import KpiCard from "@/components/admin/reports/KpiCard";
 import CurrentValueCard from "@/components/admin/reports/CurrentValueCard";
+import RecentOrdersWidget from "@/components/admin/dashboard/RecentOrdersWidget";
+import LowStockWidget from "@/components/admin/dashboard/LowStockWidget";
 import PageHeader from "@/components/ui/PageHeader";
 
 function AdminKpiRow() {
@@ -53,6 +55,16 @@ export default function AdminDashboardPage() {
         action={isAdmin ? <Link href="/admin/reports">Xem báo cáo →</Link> : undefined}
       />
       {isAdmin && <AdminKpiRow />}
+      {isAdmin && (
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={24} md={12}>
+            <RecentOrdersWidget />
+          </Col>
+          <Col xs={24} md={12}>
+            <LowStockWidget />
+          </Col>
+        </Row>
+      )}
       <Row gutter={16}>
         <Col xs={24} sm={12} md={8}>
           <Link href="/admin/products">

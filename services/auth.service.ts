@@ -2,6 +2,7 @@ import { apiGet, apiPost } from "./apiClient";
 import type {
   AuthTokenDto,
   AuthUserDto,
+  ChangePasswordRequest,
   ForgotPasswordRequest,
   LoginRequest,
   MessageDto,
@@ -39,4 +40,7 @@ export const authService = {
     apiPost<null>("/api/v1/auth/revoke", body).then(() => undefined),
 
   me: () => apiGet<AuthUserDto>("/api/v1/auth/me").then((r) => r.data),
+
+  changePassword: (body: ChangePasswordRequest) =>
+    apiPost<AuthTokenDto>("/api/v1/auth/change-password", body).then((r) => r.data),
 };

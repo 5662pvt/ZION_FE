@@ -11,7 +11,11 @@ interface HealthCheckCardProps {
 
 export default function HealthCheckCard({ title, status, durationMs, description }: HealthCheckCardProps) {
   return (
-    <Card title={title} extra={<HealthStatusBadge status={status} />}>
+    <Card
+      title={title}
+      extra={<HealthStatusBadge status={status} />}
+      styles={{ title: { whiteSpace: "normal", overflow: "visible", textOverflow: "unset", lineHeight: 1.3 } }}
+    >
       <Typography.Text type="secondary">{description ?? "—"}</Typography.Text>
       <div style={{ marginTop: 8, fontSize: 13, color: "var(--color-muted)" }}>{durationMs.toFixed(0)} ms</div>
     </Card>

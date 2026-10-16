@@ -5,6 +5,8 @@ import type {
   AdminReviewListParams,
   CreateReviewRequest,
   HideReviewRequest,
+  MyReviewDto,
+  MyReviewsParams,
   ReviewBatchSummaryDto,
   ReviewDto,
   ReviewEligibilityDto,
@@ -61,6 +63,15 @@ export const reviewsService = {
     apiPut<ReviewDto>(`/api/v1/reviews/${id}`, body).then((r) => r.data),
 
   delete: (id: string) => apiDelete<null>(`/api/v1/reviews/${id}`).then(() => undefined),
+
+  getMine: async (params: MyReviewsParams = {}): Promise<Paged<MyReviewDto>> => {
+    const search = new URLSearchParams();
+    if (params.page) search.set("page", String(params.page));
+    if (params.pageSize) search.set("pageSize", String(params.pageSize));
+    const qs = search.toString();
+    const { data, pagination } = await apiGet<MyReviewDto[]>(`/api/v1/reviews/mine${qs ? `?${qs}` : ""}`);
+    return { items: data, pagination: pagination as NonNullable<typeof pagination> };
+  },
 };
 
 export const adminReviewsService = {

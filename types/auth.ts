@@ -60,3 +60,8 @@ export interface RefreshTokenRequest {
 export interface RevokeTokenRequest {
   refreshToken: string;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

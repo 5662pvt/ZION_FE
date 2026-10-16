@@ -1,5 +1,4 @@
-import { apiGet } from "./apiClient";
-import { getAccessToken } from "@/utils/authStorage";
+import { apiDownload, apiGet } from "./apiClient";
 import type {
   DashboardReportDto,
   PromotionPerformanceItemDto,
@@ -10,8 +9,6 @@ import type {
   TopProductsParams,
 } from "@/types/reports";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
-
 function buildQuery(params: object): string {
   const search = new URLSearchParams();
   Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
@@ -21,12 +18,6 @@ function buildQuery(params: object): string {
   return qs ? `?${qs}` : "";
 }
 
-function filenameFromContentDisposition(value: string | null, fallback: string): string {
-  if (!value) return fallback;
-  const match = /filename="?([^";]+)"?/i.exec(value);
-  return match ? match[1] : fallback;
-}
-
 function buildExportFilename(prefix: string, params: ReportDateRangeParams): string {
   const from = params.from?.replace(/-/g, "");
   const to = params.to?.replace(/-/g, "");
@@ -34,16 +25,8 @@ function buildExportFilename(prefix: string, params: ReportDateRangeParams): str
   return `${prefix}${suffix}.csv`;
 }
 
-async function downloadCsv(path: string, fallbackFilename: string): Promise<void> {
-  const headers = new Headers();
-  const accessToken = getAccessToken();
-  if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
-
-  const res = await fetch(`${BASE_URL}${path}`, { headers });
-  if (!res.ok) throw new Error(`Xuất CSV thất bại (${res.status})`);
-
-  const blob = await res.blob();
-  const filename = filenameFromContentDisposition(res.headers.get("Content-Disposition"), fallbackFilename);
+async function downloadCsv(path: string, params: ReportDateRangeParams, filename: string): Promise<void> {
+  const blob = await apiDownload(path, params as Record<string, string | number | undefined>);
 
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -69,14 +52,11 @@ export const reportsService = {
     apiGet<PromotionPerformanceItemDto[]>(`/api/v1/admin/reports/promotions${buildQuery(params)}`).then((r) => r.data),
 
   exportRevenueCsv: (params: ReportDateRangeParams = {}) =>
-    downloadCsv(`/api/v1/admin/reports/export/revenue.csv${buildQuery(params)}`, buildExportFilename("doanh-thu", params)),
+    downloadCsv("/api/v1/admin/reports/export/revenue.csv", params, buildExportFilename("doanh-thu", params)),
 
   exportTopProductsCsv: (params: ReportDateRangeParams = {}) =>
-    downloadCsv(
-      `/api/v1/admin/reports/export/top-products.csv${buildQuery(params)}`,
-      buildExportFilename("san-pham-ban-chay", params),
-    ),
+    downloadCsv("/api/v1/admin/reports/export/top-products.csv", params, buildExportFilename("san-pham-ban-chay", params)),
 
   exportPromotionsCsv: (params: ReportDateRangeParams = {}) =>
-    downloadCsv(`/api/v1/admin/reports/export/promotions.csv${buildQuery(params)}`, buildExportFilename("khuyen-mai", params)),
+    downloadCsv("/api/v1/admin/reports/export/promotions.csv", params, buildExportFilename("khuyen-mai", params)),
 };

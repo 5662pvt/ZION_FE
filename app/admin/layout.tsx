@@ -10,7 +10,9 @@ import {
   FiBarChart2,
   FiBox,
   FiChevronDown,
+  FiCreditCard,
   FiExternalLink,
+  FiFileText,
   FiHome,
   FiInbox,
   FiLayers,
@@ -21,6 +23,7 @@ import {
   FiStar,
   FiTag,
   FiUser,
+  FiUsers,
 } from "react-icons/fi";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,6 +76,8 @@ const NAV_GROUPS: NavGroup[] = [
       { key: "orders", href: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
       { key: "promotions", href: "/admin/promotions", icon: <FiPercent />, label: "Khuyến mãi" },
       { key: "reviews", href: "/admin/reviews", icon: <FiStar />, label: "Đánh giá" },
+      { key: "customers", href: "/admin/customers", icon: <FiUsers />, label: "Khách hàng", adminOnly: true },
+      { key: "payments", href: "/admin/payments", icon: <FiCreditCard />, label: "Thanh toán", adminOnly: true },
     ],
   },
   {
@@ -82,6 +87,7 @@ const NAV_GROUPS: NavGroup[] = [
       { key: "system-health", href: "/admin/system/health", icon: <FiActivity />, label: "Sức khoẻ hệ thống", adminOnly: true },
       { key: "system-messages", href: "/admin/system/messages", icon: <FiInbox />, label: "Outbox / Inbox", adminOnly: true },
       { key: "system-dlq", href: "/admin/system/dlq", icon: <FiAlertTriangle />, label: "Hàng đợi lỗi (DLQ)", adminOnly: true },
+      { key: "audit-logs", href: "/admin/audit-logs", icon: <FiFileText />, label: "Nhật ký thao tác", adminOnly: true },
     ],
   },
 ];

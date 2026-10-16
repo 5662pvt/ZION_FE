@@ -34,3 +34,24 @@ export interface AddAddressRequest {
 }
 
 export type UpdateAddressRequest = AddAddressRequest;
+
+export interface WishlistItemDto {
+  productId: string;
+  name: string;
+  slug: string;
+  price: number;
+  currency: string;
+  thumbnailUrl: string | null;
+  inStock: boolean;
+  addedAt: string;
+}
+
+export interface WishlistToggleResponse {
+  productId: string;
+  inWishlist: boolean;
+}
+
+export interface WishlistParams {
+  page?: number;
+  pageSize?: number;
+}

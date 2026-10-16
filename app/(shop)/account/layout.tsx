@@ -9,6 +9,10 @@ const MENU_ITEMS = [
   { key: "/account", label: "Hồ sơ" },
   { key: "/account/addresses", label: "Sổ địa chỉ" },
   { key: "/account/orders", label: "Đơn hàng" },
+  { key: "/account/wishlist", label: "Yêu thích" },
+  { key: "/account/notifications", label: "Thông báo" },
+  { key: "/account/reviews", label: "Đánh giá của tôi" },
+  { key: "/account/security", label: "Bảo mật" },
 ];
 
 export default function AccountLayout({ children }: { children: ReactNode }) {

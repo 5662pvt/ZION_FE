@@ -122,3 +122,46 @@ export function apiDelete<T>(path: string): Promise<ApiResult<T>> {
 export function apiUpload<T>(path: string, formData: FormData): Promise<ApiResult<T>> {
   return request<T>(path, { method: "POST", body: formData }, true, true);
 }
+
+function buildDownloadQuery(params?: Record<string, string | number | undefined>): string {
+  if (!params) return "";
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") search.set(key, String(value));
+  });
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
+async function fetchDownload(path: string, allowRetry: boolean): Promise<Response> {
+  const headers = new Headers();
+  headers.set("X-Cart-Token", getCartToken());
+
+  const accessToken = getAccessToken();
+  if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { headers });
+  } catch {
+    throw new ApiError(0, "Không kết nối được máy chủ");
+  }
+
+  if (res.status === 401 && allowRetry) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) return fetchDownload(path, false);
+    clearAuthStorage();
+  }
+
+  if (!res.ok) {
+    const body = await parseResponseBody<unknown>(res).catch(() => null);
+    throw new ApiError(res.status, body?.message ?? `Lỗi máy chủ (${res.status})`);
+  }
+
+  return res;
+}
+
+export async function apiDownload(path: string, params?: Record<string, string | number | undefined>): Promise<Blob> {
+  const res = await fetchDownload(`${path}${buildDownloadQuery(params)}`, true);
+  return res.blob();
+}

@@ -5,6 +5,7 @@ import type { PromotionStatus } from "@/types/promotions";
 import type { ProductStatus } from "@/types/products";
 import type { ReviewStatus } from "@/types/reviews";
 import type { HealthStatus, OutboxStatus } from "@/types/system";
+import type { AdminPaymentStatus } from "@/types/adminPayments";
 
 interface StatusBadgeProps {
   color: string;
@@ -110,6 +111,27 @@ const HEALTH_STATUS: Record<HealthStatus, { label: string; color: string }> = {
 
 export function HealthStatusBadge({ status }: { status: HealthStatus }) {
   const entry = HEALTH_STATUS[status];
+  return <StatusBadge color={entry.color}>{entry.label}</StatusBadge>;
+}
+
+export function CustomerStatusBadge({ isActive }: { isActive: boolean }) {
+  return isActive ? (
+    <StatusBadge color="var(--color-success)">Hoạt động</StatusBadge>
+  ) : (
+    <StatusBadge color="var(--color-danger)">Đã khoá</StatusBadge>
+  );
+}
+
+const PAYMENT_STATUS: Record<AdminPaymentStatus, { label: string; color: string }> = {
+  Pending: { label: "Đang chờ", color: "var(--color-warning)" },
+  Succeeded: { label: "Thành công", color: "var(--color-success)" },
+  Failed: { label: "Thất bại", color: "var(--color-danger)" },
+  Expired: { label: "Hết hạn", color: "var(--color-muted)" },
+  Cancelled: { label: "Đã huỷ", color: "var(--color-muted)" },
+};
+
+export function PaymentStatusBadge({ status }: { status: AdminPaymentStatus }) {
+  const entry = PAYMENT_STATUS[status];
   return <StatusBadge color={entry.color}>{entry.label}</StatusBadge>;
 }
 
