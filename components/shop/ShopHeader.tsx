@@ -13,6 +13,7 @@ import SearchAutocomplete from "./layout/SearchAutocomplete";
 import MobileNavDrawer from "./layout/MobileNavDrawer";
 import MobileSearchOverlay from "./layout/MobileSearchOverlay";
 import CartBadge from "./CartBadge";
+import NotificationBell from "./NotificationBell";
 
 function toMenuItems(nodes: CategoryTreeNodeDto[]): MenuProps["items"] {
   return nodes.map((node) => ({
@@ -105,6 +106,7 @@ export default function ShopHeader() {
             >
               <FiSearch aria-hidden />
             </button>
+            <NotificationBell />
             <CartBadge />
             <Dropdown menu={{ items: accountItems }} trigger={["click"]}>
               <Flex align="center" gap="small" style={{ cursor: "pointer" }}>

@@ -10,6 +10,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/components/common/AuthProvider";
 import { ApiError } from "@/services/apiClient";
 import { antdTheme } from "@/theme/antdTheme";
+import { useNotificationSocket } from "@/hooks/useNotificationSocket";
+
+function NotificationSocketBridge({ children }: { children: ReactNode }) {
+  useNotificationSocket();
+  return children;
+}
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -31,8 +37,10 @@ export default function Providers({ children }: { children: ReactNode }) {
     <ConfigProvider locale={viVN} theme={antdTheme}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          {children}
-          <ToastContainer position="bottom-right" />
+          <NotificationSocketBridge>
+            {children}
+            <ToastContainer position="bottom-right" />
+          </NotificationSocketBridge>
         </AuthProvider>
       </QueryClientProvider>
     </ConfigProvider>

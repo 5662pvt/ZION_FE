@@ -10,7 +10,7 @@ import type { AdminCustomerListParams } from "@/types/adminCustomers";
 import type { AdminPaymentListParams } from "@/types/adminPayments";
 import type { AuditLogListParams } from "@/types/auditLogs";
 import type { WishlistParams } from "@/types/users";
-import type { MyNotificationsParams } from "@/types/notifications";
+import type { MyNotificationsParams, NotificationFeedParams } from "@/types/notifications";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -64,6 +64,8 @@ export const queryKeys = {
   },
   notifications: {
     mine: (params: MyNotificationsParams) => ["notifications", "mine", params] as const,
+    feed: (params: NotificationFeedParams) => ["notifications", "feed", params] as const,
+    unreadCount: () => ["notifications", "unreadCount"] as const,
   },
   reports: {
     dashboard: (params: ReportDateRangeParams) => ["reports", "dashboard", params] as const,

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { FiGrid, FiHome, FiList, FiUser } from "react-icons/fi";
 import { useAuth } from "@/hooks/useAuth";
 import CartBadge from "@/components/shop/CartBadge";
+import NotificationBell from "@/components/shop/NotificationBell";
 import MobileNavDrawer from "./MobileNavDrawer";
 
 function tabStyle(active: boolean): CSSProperties {
@@ -61,6 +62,7 @@ export default function BottomTabBar() {
           <span>Danh mục</span>
         </button>
         <CartBadge variant="tab" active={isCart} />
+        <NotificationBell variant="tab" active={pathname.startsWith("/account/notifications")} />
         <Link
           href="/account/orders"
           aria-label="Đơn hàng"
