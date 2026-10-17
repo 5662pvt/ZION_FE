@@ -26,6 +26,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import AdminGuard from "@/components/admin/AdminGuard";
+import NotificationBell from "@/components/shop/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { ROLES } from "@/constants/roles";
 import { resolveBreadcrumb } from "@/components/admin/common/breadcrumb";
@@ -180,13 +181,16 @@ function AdminShell({ children }: { children: ReactNode }) {
             <Breadcrumb className={styles.breadcrumb} items={breadcrumbItems} />
             <span className={styles.pageTitle}>{pageTitle}</span>
           </div>
-          <Dropdown menu={{ items: accountMenuItems }} trigger={["click"]}>
-            <Button type="text" className={styles.accountTrigger} aria-label="Tài khoản">
-              <FiUser aria-hidden />
-              <span className={styles.accountLabel}>{user?.displayName ?? user?.email}</span>
-              <FiChevronDown aria-hidden />
-            </Button>
-          </Dropdown>
+          <div className={styles.headerRight}>
+            <NotificationBell />
+            <Dropdown menu={{ items: accountMenuItems }} trigger={["click"]}>
+              <Button type="text" className={styles.accountTrigger} aria-label="Tài khoản">
+                <FiUser aria-hidden />
+                <span className={styles.accountLabel}>{user?.displayName ?? user?.email}</span>
+                <FiChevronDown aria-hidden />
+              </Button>
+            </Dropdown>
+          </div>
         </Header>
         <Content className={styles.content}>{children}</Content>
       </Layout>
