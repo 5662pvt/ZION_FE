@@ -21,7 +21,9 @@ export type UserNotificationType =
   | "OrderShipped"
   | "OrderCancelled"
   | "PaymentCompleted"
-  | "PaymentFailed";
+  | "PaymentFailed"
+  | "OrderCreatedForReview"
+  | "OrderCompleted";
 
 export interface UserNotificationDto {
   id: string;
