@@ -8,6 +8,8 @@ export interface ReviewDto {
   isVerifiedPurchase: boolean;
   createdAt: string;
   updatedAt: string;
+  replyContent: string | null;
+  repliedAt: string | null;
 }
 
 export type ReviewStatus = "Published" | "Hidden";
@@ -16,6 +18,10 @@ export interface AdminReviewDto extends ReviewDto {
   productName: string;
   status: ReviewStatus;
   hiddenReason: string | null;
+}
+
+export interface ReplyToReviewRequest {
+  content: string;
 }
 
 export interface ReviewDistribution {
@@ -82,6 +88,8 @@ export interface MyReviewDto {
   status: ReviewStatus;
   hiddenReason: string | null;
   createdAt: string;
+  replyContent: string | null;
+  repliedAt: string | null;
 }
 
 export interface MyReviewsParams {

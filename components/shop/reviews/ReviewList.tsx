@@ -49,7 +49,27 @@ export default function ReviewList({ items, loading, pagination, onPageChange }:
               {review.title}
             </Text>
           )}
-          <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{review.content}</Paragraph>
+          <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: review.replyContent ? 8 : 0 }}>
+            {review.content}
+          </Paragraph>
+          {review.replyContent && (
+            <div
+              style={{
+                marginLeft: 16,
+                padding: 12,
+                background: "var(--color-page)",
+                borderRadius: 8,
+              }}
+            >
+              <Text strong>Phản hồi từ người bán</Text>
+              {review.repliedAt && (
+                <Text type="secondary" style={{ marginLeft: 8 }}>
+                  {dayjs(review.repliedAt).format("DD/MM/YYYY")}
+                </Text>
+              )}
+              <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{review.replyContent}</Paragraph>
+            </div>
+          )}
         </div>
       ))}
       <Pagination

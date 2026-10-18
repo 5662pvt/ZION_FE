@@ -10,6 +10,8 @@ import ProductTabs from "@/components/shop/product/ProductTabs";
 import WishlistButton from "@/components/shop/product/WishlistButton";
 import { useAddToCart } from "@/hooks/useCart";
 import { useProductAvailability } from "@/hooks/useAvailability";
+import { useActiveFlashSaleForProduct } from "@/hooks/useFlashSales";
+import FlashSaleCountdown from "@/components/shop/home/FlashSaleCountdown";
 import { toast } from "@/utils/toast";
 import { ApiError } from "@/services/apiClient";
 import Price from "@/components/ui/Price";
@@ -25,6 +27,7 @@ interface ProductDetailProps {
 export default function ProductDetail({ product }: ProductDetailProps) {
   const router = useRouter();
   const { data: availability } = useProductAvailability(product.id);
+  const { item: flashSaleItem } = useActiveFlashSaleForProduct(product.id);
   const addToCart = useAddToCart();
   const [quantity, setQuantity] = useState(1);
   const [intent, setIntent] = useState<"idle" | "add" | "buyNow">("idle");
@@ -77,7 +80,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       )}
 
       <div style={{ margin: "12px 0" }}>
-        <Price value={product.price} size="large" />
+        {flashSaleItem ? (
+          <Space direction="vertical" size={4}>
+            <Price value={flashSaleItem.flashPrice} oldValue={flashSaleItem.regularPrice} size="large" />
+            <Space size={12}>
+              <FlashSaleCountdown endsAt={flashSaleItem.flashSaleEndsAt} />
+              <Text type="secondary">Còn {flashSaleItem.available} suất</Text>
+            </Space>
+          </Space>
+        ) : (
+          <Price value={product.price} size="large" />
+        )}
       </div>
 
       {inStock !== undefined && (

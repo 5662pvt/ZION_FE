@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { Checkbox, Form, Input, Modal } from "antd";
+import { useEffect, useState } from "react";
+import { Checkbox, Form, Input, Modal, Select } from "antd";
 import { useAddAddress, useUpdateAddress } from "@/hooks/useAddresses";
 import { useProfile } from "@/hooks/useProfile";
+import { useProvinces, useWards } from "@/hooks/useGeo";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
 import type { AddAddressRequest, AddressDto } from "@/types/users";
@@ -30,8 +31,26 @@ export default function AddressFormModal({ open, address, onClose }: AddressForm
   const addAddress = useAddAddress();
   const updateAddress = useUpdateAddress();
   const { data: profile } = useProfile();
+  const { data: provinces } = useProvinces();
+  const [userProvinceId, setUserProvinceId] = useState<string | undefined>(undefined);
+  const [syncedFor, setSyncedFor] = useState<string | null>(null);
   const isEditing = address !== null;
   const submitting = addAddress.isPending || updateAddress.isPending;
+
+  // Reset the user's province override whenever the modal (re)opens for a different address,
+  // so editing address A then address B doesn't carry over A's selection.
+  const formKey = open ? address?.id ?? "__new__" : null;
+  if (formKey !== null && formKey !== syncedFor) {
+    setSyncedFor(formKey);
+    setUserProvinceId(undefined);
+  }
+
+  const initialProvinceId = address ? provinces?.find((p) => p.name === address.province)?.id : undefined;
+  const selectedProvinceId = userProvinceId ?? initialProvinceId;
+  const { data: wards } = useWards(selectedProvinceId);
+
+  const provinceOptions = (provinces ?? []).map((p) => ({ value: p.name, label: p.name, id: p.id }));
+  const wardOptions = (wards ?? []).map((w) => ({ value: w.name, label: w.name, id: w.id }));
 
   useEffect(() => {
     if (open) {
@@ -144,22 +163,26 @@ export default function AddressFormModal({ open, address, onClose }: AddressForm
         <Form.Item
           name="province"
           label="Tỉnh/Thành phố"
-          rules={[
-            { required: true, message: "Vui lòng nhập tỉnh/thành phố" },
-            { max: 100, message: "Tối đa 100 ký tự" },
-          ]}
+          rules={[{ required: true, message: "Vui lòng chọn tỉnh/thành phố" }]}
         >
-          <Input placeholder="Tỉnh/Thành phố" />
+          <Select
+            placeholder="Chọn tỉnh/thành phố"
+            showSearch
+            optionFilterProp="label"
+            options={provinceOptions}
+            onChange={(_value, option) => {
+              const selected = Array.isArray(option) ? option[0] : option;
+              setUserProvinceId(selected?.id);
+              form.setFieldValue("ward", undefined);
+            }}
+          />
         </Form.Item>
         <Form.Item
           name="ward"
           label="Phường/Xã"
-          rules={[
-            { required: true, message: "Vui lòng nhập phường/xã" },
-            { max: 100, message: "Tối đa 100 ký tự" },
-          ]}
+          rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
         >
-          <Input placeholder="Phường/Xã" />
+          <Select placeholder="Chọn phường/xã" showSearch optionFilterProp="label" disabled={!selectedProvinceId} options={wardOptions} />
         </Form.Item>
         <Form.Item
           name="streetAddress"

@@ -3,7 +3,9 @@ import type { MyOrdersParams } from "@/types/orders";
 import type { InventoryListParams, StockMovementsParams } from "@/types/inventory";
 import type { AdminOrderListParams } from "@/types/adminOrders";
 import type { PromotionListParams } from "@/types/promotions";
+import type { FlashSaleListParams } from "@/types/flashSales";
 import type { AdminReviewListParams, MyReviewsParams, ReviewListParams } from "@/types/reviews";
+import type { ProductQuestionListParams } from "@/types/questions";
 import type { ReportDateRangeParams, TopCategoriesParams, TopProductsParams } from "@/types/reports";
 import type { InboxListParams, OutboxListParams } from "@/types/system";
 import type { AdminCustomerListParams } from "@/types/adminCustomers";
@@ -19,6 +21,10 @@ export const queryKeys = {
   cart: ["cart"] as const,
   categories: {
     tree: ["categories", "tree"] as const,
+  },
+  geo: {
+    provinces: ["geo", "provinces"] as const,
+    wards: (provinceId: string) => ["geo", "wards", provinceId] as const,
   },
   products: {
     list: (filters: ProductListParams) => ["products", "list", filters] as const,
@@ -50,6 +56,11 @@ export const queryKeys = {
   gifts: {
     preview: (signature: string) => ["gifts", "preview", signature] as const,
   },
+  flashSales: {
+    active: ["flashSales", "active"] as const,
+    list: (filters: FlashSaleListParams) => ["flashSales", "admin", "list", filters] as const,
+    detail: (id: string) => ["flashSales", "admin", "detail", id] as const,
+  },
   reviews: {
     list: (productId: string, filters: ReviewListParams) => ["reviews", "list", productId, filters] as const,
     summary: (productId: string) => ["reviews", "summary", productId] as const,
@@ -57,6 +68,10 @@ export const queryKeys = {
     eligibility: (productId: string) => ["reviews", "eligibility", productId] as const,
     adminList: (filters: AdminReviewListParams) => ["reviews", "admin", "list", filters] as const,
     mine: (params: MyReviewsParams) => ["reviews", "mine", params] as const,
+  },
+  productQuestions: {
+    list: (productId: string, filters: ProductQuestionListParams) =>
+      ["productQuestions", "list", productId, filters] as const,
   },
   wishlist: {
     ids: ["wishlist", "ids"] as const,

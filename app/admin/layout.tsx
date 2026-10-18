@@ -24,6 +24,7 @@ import {
   FiTag,
   FiUser,
   FiUsers,
+  FiZap,
 } from "react-icons/fi";
 import AdminGuard from "@/components/admin/AdminGuard";
 import NotificationBell from "@/components/shop/NotificationBell";
@@ -76,6 +77,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: "orders", href: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
       { key: "promotions", href: "/admin/promotions", icon: <FiPercent />, label: "Khuyến mãi" },
+      { key: "flash-sales", href: "/admin/flash-sales", icon: <FiZap />, label: "Flash Sale" },
       { key: "reviews", href: "/admin/reviews", icon: <FiStar />, label: "Đánh giá" },
       { key: "customers", href: "/admin/customers", icon: <FiUsers />, label: "Khách hàng", adminOnly: true },
       { key: "payments", href: "/admin/payments", icon: <FiCreditCard />, label: "Thanh toán", adminOnly: true },

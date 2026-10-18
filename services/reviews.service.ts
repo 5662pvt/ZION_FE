@@ -7,6 +7,7 @@ import type {
   HideReviewRequest,
   MyReviewDto,
   MyReviewsParams,
+  ReplyToReviewRequest,
   ReviewBatchSummaryDto,
   ReviewDto,
   ReviewEligibilityDto,
@@ -84,4 +85,10 @@ export const adminReviewsService = {
     apiPost<AdminReviewDto>(`/api/v1/admin/reviews/${id}/hide`, body).then((r) => r.data),
 
   show: (id: string) => apiPost<AdminReviewDto>(`/api/v1/admin/reviews/${id}/show`).then((r) => r.data),
+
+  reply: (id: string, body: ReplyToReviewRequest) =>
+    apiPost<AdminReviewDto>(`/api/v1/admin/reviews/${id}/reply`, body).then((r) => r.data),
+
+  removeReply: (id: string) =>
+    apiDelete<AdminReviewDto>(`/api/v1/admin/reviews/${id}/reply`).then((r) => r.data),
 };

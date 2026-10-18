@@ -9,6 +9,7 @@ const SECTION_LABELS: Record<string, string> = {
   orders: "Đơn hàng",
   inventory: "Tồn kho",
   promotions: "Khuyến mãi",
+  "flash-sales": "Flash Sale",
   reviews: "Đánh giá",
   reports: "Báo cáo",
   system: "Hệ thống",

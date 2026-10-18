@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Descriptions, Tabs, Typography } from "antd";
 import ProductReviews from "@/components/shop/reviews/ProductReviews";
+import ProductQA from "@/components/shop/product/ProductQA";
 import { useReviewSummary } from "@/hooks/useReviews";
+import { useProductQuestions } from "@/hooks/useProductQuestions";
 import type { ProductDto } from "@/types/products";
 
 const { Paragraph, Text } = Typography;
@@ -14,14 +16,16 @@ interface ProductTabsProps {
 
 export default function ProductTabs({ product }: ProductTabsProps) {
   const { data: summary } = useReviewSummary(product.id);
+  const { data: questions } = useProductQuestions(product.id, { page: 1, pageSize: 10 });
   const [activeKey, setActiveKey] = useState("description");
 
   useEffect(() => {
-    if (window.location.hash === "#reviews") {
+    if (window.location.hash === "#reviews" || window.location.hash === "#qa") {
+      const key = window.location.hash === "#qa" ? "qa" : "reviews";
       // Syncing tab state from the URL hash on mount requires an effect; there is no render-time source for it.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveKey("reviews");
-      requestAnimationFrame(() => document.getElementById("reviews")?.scrollIntoView());
+      setActiveKey(key);
+      requestAnimationFrame(() => document.getElementById(key)?.scrollIntoView());
     }
   }, []);
 
@@ -54,6 +58,11 @@ export default function ProductTabs({ product }: ProductTabsProps) {
           key: "reviews",
           label: `Đánh giá (${summary?.count ?? 0})`,
           children: <ProductReviews productId={product.id} />,
+        },
+        {
+          key: "qa",
+          label: `Hỏi đáp (${questions?.pagination.totalCount ?? 0})`,
+          children: <ProductQA productId={product.id} />,
         },
       ]}
     />

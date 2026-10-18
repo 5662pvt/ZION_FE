@@ -3,6 +3,7 @@
 import { useCategoryTree } from "@/hooks/useCategories";
 import HeroSection from "@/components/shop/home/HeroSection";
 import CategoryTiles from "@/components/shop/home/CategoryTiles";
+import FlashSaleRow from "@/components/shop/home/FlashSaleRow";
 import NewProductsRow from "@/components/shop/home/NewProductsRow";
 import CategorySection from "@/components/shop/home/CategorySection";
 import PolicyStrip from "@/components/shop/home/PolicyStrip";
@@ -20,7 +21,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="home-section home-section--sky">
+      <FlashSaleRow />
+
+      <section className="home-section home-section--white">
         <div className="home-container">
           <NewProductsRow />
         </div>

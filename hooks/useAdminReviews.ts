@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminReviewsService } from "@/services/reviews.service";
 import { queryKeys } from "@/constants/queryKeys";
-import type { AdminReviewListParams, HideReviewRequest } from "@/types/reviews";
+import type { AdminReviewListParams, HideReviewRequest, ReplyToReviewRequest } from "@/types/reviews";
 
 export function useAdminReviews(params: AdminReviewListParams) {
   return useQuery({
@@ -28,6 +28,22 @@ export function useShowReview() {
   const invalidate = useInvalidateAdminReviews();
   return useMutation({
     mutationFn: (id: string) => adminReviewsService.show(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useReplyToReview() {
+  const invalidate = useInvalidateAdminReviews();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: ReplyToReviewRequest }) => adminReviewsService.reply(id, body),
+    onSuccess: invalidate,
+  });
+}
+
+export function useRemoveReviewReply() {
+  const invalidate = useInvalidateAdminReviews();
+  return useMutation({
+    mutationFn: (id: string) => adminReviewsService.removeReply(id),
     onSuccess: invalidate,
   });
 }

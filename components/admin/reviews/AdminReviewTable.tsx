@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Button, Form, Input, Modal, Popconfirm, Typography, type TableProps } from "antd";
+import { Button, Form, Input, Modal, Popconfirm, Space, Typography, type TableProps } from "antd";
 import StarRating from "@/components/shop/reviews/StarRating";
-import { useHideReview, useShowReview } from "@/hooks/useAdminReviews";
+import { useHideReview, useReplyToReview, useRemoveReviewReply, useShowReview } from "@/hooks/useAdminReviews";
 import { toast } from "@/utils/toast";
 import { ApiError } from "@/services/apiClient";
 import { ReviewStatusBadge } from "@/components/ui/StatusBadge";
@@ -30,13 +30,27 @@ interface HideFormValues {
   reason?: string;
 }
 
+interface ReplyModalState {
+  open: boolean;
+  review: AdminReviewDto | null;
+}
+
+interface ReplyFormValues {
+  content: string;
+}
+
 const CLOSED_HIDE_MODAL: HideModalState = { open: false, review: null };
+const CLOSED_REPLY_MODAL: ReplyModalState = { open: false, review: null };
 
 export default function AdminReviewTable({ items, loading, pagination, onPageChange }: AdminReviewTableProps) {
   const [hideModal, setHideModal] = useState<HideModalState>(CLOSED_HIDE_MODAL);
   const [form] = Form.useForm<HideFormValues>();
   const hideReview = useHideReview();
   const showReview = useShowReview();
+  const [replyModal, setReplyModal] = useState<ReplyModalState>(CLOSED_REPLY_MODAL);
+  const [replyForm] = Form.useForm<ReplyFormValues>();
+  const replyToReview = useReplyToReview();
+  const removeReviewReply = useRemoveReviewReply();
 
   const handleHideSubmit = async (values: HideFormValues) => {
     if (!hideModal.review) return;
@@ -56,6 +70,32 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
       toast.success("Đã hiện đánh giá");
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Hiện đánh giá thất bại, vui lòng thử lại");
+    }
+  };
+
+  const openReplyModal = (review: AdminReviewDto) => {
+    setReplyModal({ open: true, review });
+    replyForm.setFieldsValue({ content: review.replyContent ?? undefined });
+  };
+
+  const handleReplySubmit = async (values: ReplyFormValues) => {
+    if (!replyModal.review) return;
+    try {
+      await replyToReview.mutateAsync({ id: replyModal.review.id, body: { content: values.content.trim() } });
+      toast.success("Đã gửi trả lời");
+      setReplyModal(CLOSED_REPLY_MODAL);
+      replyForm.resetFields();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Trả lời thất bại, vui lòng thử lại");
+    }
+  };
+
+  const handleRemoveReply = async (review: AdminReviewDto) => {
+    try {
+      await removeReviewReply.mutateAsync(review.id);
+      toast.success("Đã xoá trả lời");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Xoá trả lời thất bại, vui lòng thử lại");
     }
   };
 
@@ -83,6 +123,19 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
       render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm"),
     },
     {
+      title: "Phản hồi",
+      dataIndex: "replyContent",
+      width: 260,
+      render: (replyContent: string | null) =>
+        replyContent ? (
+          <Paragraph ellipsis={{ rows: 2, expandable: true, symbol: "xem thêm" }} style={{ marginBottom: 0 }}>
+            {replyContent}
+          </Paragraph>
+        ) : (
+          <Text type="secondary">Chưa trả lời</Text>
+        ),
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       render: (status: AdminReviewDto["status"], record) => (
@@ -101,18 +154,46 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
     {
       title: "Hành động",
       key: "action",
-      render: (_, record) =>
-        record.status === "Published" ? (
-          <Button size="small" onClick={() => setHideModal({ open: true, review: record })}>
-            Ẩn
-          </Button>
-        ) : (
-          <Popconfirm title="Hiện lại đánh giá này?" okText="Hiện" cancelText="Đóng" onConfirm={() => handleShow(record)}>
-            <Button size="small" type="primary" loading={showReview.isPending}>
-              Hiện
+      render: (_, record) => (
+        <Space direction="vertical" size="small">
+          <Space size="small">
+            {record.status === "Published" ? (
+              <Button size="small" onClick={() => setHideModal({ open: true, review: record })}>
+                Ẩn
+              </Button>
+            ) : (
+              <Popconfirm
+                title="Hiện lại đánh giá này?"
+                okText="Hiện"
+                cancelText="Đóng"
+                onConfirm={() => handleShow(record)}
+              >
+                <Button size="small" type="primary" loading={showReview.isPending}>
+                  Hiện
+                </Button>
+              </Popconfirm>
+            )}
+          </Space>
+          <Space size="small">
+            <Button size="small" onClick={() => openReplyModal(record)}>
+              {record.replyContent ? "Sửa trả lời" : "Trả lời"}
             </Button>
-          </Popconfirm>
-        ),
+            {record.replyContent && (
+              <Popconfirm
+                title="Xoá trả lời này?"
+                okText="Xoá"
+                cancelText="Đóng"
+                okButtonProps={{ danger: true, loading: removeReviewReply.isPending }}
+                onConfirm={() => handleRemoveReply(record)}
+              >
+                <Button size="small" danger>
+                  Xoá trả lời
+                </Button>
+              </Popconfirm>
+            )}
+          </Space>
+        </Space>
+      ),
     },
   ];
 
@@ -135,19 +216,47 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
               { label: "Tác giả", value: record.authorName },
               { label: "Nội dung", value: record.content },
               { label: "Ngày", value: dayjs(record.createdAt).format("DD/MM/YYYY HH:mm") },
+              { label: "Phản hồi", value: record.replyContent ?? "Chưa trả lời" },
             ]}
             action={
-              record.status === "Published" ? (
-                <Button size="small" onClick={() => setHideModal({ open: true, review: record })}>
-                  Ẩn
-                </Button>
-              ) : (
-                <Popconfirm title="Hiện lại đánh giá này?" okText="Hiện" cancelText="Đóng" onConfirm={() => handleShow(record)}>
-                  <Button size="small" type="primary" loading={showReview.isPending}>
-                    Hiện
+              <Space direction="vertical" size="small">
+                <Space size="small">
+                  {record.status === "Published" ? (
+                    <Button size="small" onClick={() => setHideModal({ open: true, review: record })}>
+                      Ẩn
+                    </Button>
+                  ) : (
+                    <Popconfirm
+                      title="Hiện lại đánh giá này?"
+                      okText="Hiện"
+                      cancelText="Đóng"
+                      onConfirm={() => handleShow(record)}
+                    >
+                      <Button size="small" type="primary" loading={showReview.isPending}>
+                        Hiện
+                      </Button>
+                    </Popconfirm>
+                  )}
+                </Space>
+                <Space size="small">
+                  <Button size="small" onClick={() => openReplyModal(record)}>
+                    {record.replyContent ? "Sửa trả lời" : "Trả lời"}
                   </Button>
-                </Popconfirm>
-              )
+                  {record.replyContent && (
+                    <Popconfirm
+                      title="Xoá trả lời này?"
+                      okText="Xoá"
+                      cancelText="Đóng"
+                      okButtonProps={{ danger: true, loading: removeReviewReply.isPending }}
+                      onConfirm={() => handleRemoveReply(record)}
+                    >
+                      <Button size="small" danger>
+                        Xoá trả lời
+                      </Button>
+                    </Popconfirm>
+                  )}
+                </Space>
+              </Space>
             }
           />
         )}
@@ -165,6 +274,29 @@ export default function AdminReviewTable({ items, loading, pagination, onPageCha
         <Form form={form} layout="vertical" onFinish={handleHideSubmit}>
           <Form.Item name="reason" label="Lý do (không bắt buộc)">
             <Input.TextArea rows={3} placeholder="Lý do ẩn đánh giá" />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        open={replyModal.open}
+        title="Trả lời đánh giá"
+        onCancel={() => setReplyModal(CLOSED_REPLY_MODAL)}
+        onOk={() => replyForm.submit()}
+        confirmLoading={replyToReview.isPending}
+        destroyOnHidden
+        okText="Gửi"
+        cancelText="Hủy"
+      >
+        <Form form={replyForm} layout="vertical" onFinish={handleReplySubmit}>
+          <Form.Item
+            name="content"
+            label="Nội dung trả lời"
+            rules={[
+              { required: true, message: "Vui lòng nhập nội dung trả lời" },
+              { max: 2000, message: "Nội dung tối đa 2000 ký tự" },
+            ]}
+          >
+            <Input.TextArea rows={4} maxLength={2000} showCount placeholder="Trả lời đánh giá của khách hàng" />
           </Form.Item>
         </Form>
       </Modal>
