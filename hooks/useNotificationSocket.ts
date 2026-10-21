@@ -22,6 +22,9 @@ export function useNotificationSocket() {
     const connection = new HubConnectionBuilder()
       .withUrl(`${process.env.NEXT_PUBLIC_API_URL ?? ""}${HUB_PATH}`, {
         accessTokenFactory: () => getAccessToken() ?? "",
+        // Auth is via accessTokenFactory (bearer token), no cookies needed; default true sends
+        // credentials:"include", which the API's CORS policy rejects (no Allow-Credentials header).
+        withCredentials: false,
       })
       .withAutomaticReconnect()
       .build();
