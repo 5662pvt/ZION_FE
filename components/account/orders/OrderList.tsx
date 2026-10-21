@@ -61,6 +61,7 @@ const STATUS_OPTIONS: OrderStatus[] = [
   "Shipped",
   "Completed",
   "Cancelled",
+  "Returned",
 ];
 
 export default function OrderList() {

@@ -7,6 +7,7 @@ import { Alert, Button, Flex, Result, Skeleton, Space, Spin, Table, Typography, 
 import Breadcrumbs from "@/components/shop/layout/Breadcrumbs";
 import OrderStatusSteps from "./OrderStatusSteps";
 import OrderActions from "./OrderActions";
+import ReturnSection from "./ReturnSection";
 import { useOrder, useOrderPolling } from "@/hooks/useOrders";
 import { ApiError } from "@/services/apiClient";
 import { paymentMethodLabel } from "@/utils/orderStatus";
@@ -26,6 +27,11 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
   const paymentResult = searchParams.get("payment");
   const { data: order, isLoading, isError, error, refetch } = useOrder(orderId);
   const { timedOut } = useOrderPolling(orderId, order?.status, refetch);
+  useOrderPolling(orderId, order?.returnRequest?.status, refetch, {
+    statuses: ["Received"],
+    intervalMs: 3000,
+    maxMs: 60 * 1000,
+  });
 
   if (isLoading) {
     return (
@@ -202,6 +208,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
       </Flex>
 
       <OrderActions order={order} />
+      <ReturnSection order={order} />
     </div>
   );
 }

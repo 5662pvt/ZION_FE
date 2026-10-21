@@ -6,6 +6,8 @@ import type { ProductStatus } from "@/types/products";
 import type { ReviewStatus } from "@/types/reviews";
 import type { HealthStatus, OutboxStatus } from "@/types/system";
 import type { AdminPaymentStatus } from "@/types/adminPayments";
+import type { RefundStatus, ReturnRequestStatus } from "@/types/returns";
+import { refundStatusColor, refundStatusLabel, returnStatusColor, returnStatusLabel } from "@/utils/returns";
 
 interface StatusBadgeProps {
   color: string;
@@ -128,11 +130,20 @@ const PAYMENT_STATUS: Record<AdminPaymentStatus, { label: string; color: string 
   Failed: { label: "Thất bại", color: "var(--color-danger)" },
   Expired: { label: "Hết hạn", color: "var(--color-muted)" },
   Cancelled: { label: "Đã huỷ", color: "var(--color-muted)" },
+  Refunded: { label: "Đã hoàn tiền", color: "var(--color-success)" },
 };
 
 export function PaymentStatusBadge({ status }: { status: AdminPaymentStatus }) {
   const entry = PAYMENT_STATUS[status];
   return <StatusBadge color={entry.color}>{entry.label}</StatusBadge>;
+}
+
+export function ReturnStatusBadge({ status }: { status: ReturnRequestStatus }) {
+  return <StatusBadge color={returnStatusColor(status)}>{returnStatusLabel(status)}</StatusBadge>;
+}
+
+export function RefundStatusBadge({ status }: { status: RefundStatus }) {
+  return <StatusBadge color={refundStatusColor(status)}>{refundStatusLabel(status)}</StatusBadge>;
 }
 
 export default StatusBadge;

@@ -13,6 +13,7 @@ import type { AdminPaymentListParams } from "@/types/adminPayments";
 import type { AuditLogListParams } from "@/types/auditLogs";
 import type { WishlistParams } from "@/types/users";
 import type { MyNotificationsParams, NotificationFeedParams } from "@/types/notifications";
+import type { AdminRefundListParams, AdminReturnListParams } from "@/types/returns";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -38,6 +39,13 @@ export const queryKeys = {
   },
   adminOrders: {
     list: (filters: AdminOrderListParams) => ["orders", "admin", "list", filters] as const,
+  },
+  returns: {
+    adminList: (filters: AdminReturnListParams) => ["returns", "admin", "list", filters] as const,
+    adminDetail: (id: string) => ["returns", "admin", "detail", id] as const,
+  },
+  refunds: {
+    adminList: (filters: AdminRefundListParams) => ["refunds", "admin", "list", filters] as const,
   },
   payments: {
     intent: (id: string) => ["payments", "intent", id] as const,

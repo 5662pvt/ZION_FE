@@ -8,6 +8,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   Shipped: "Đang giao",
   Completed: "Hoàn tất",
   Cancelled: "Đã huỷ",
+  Returned: "Đã trả hàng",
 };
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -18,6 +19,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   Shipped: "geekblue",
   Completed: "green",
   Cancelled: "red",
+  Returned: "default",
 };
 
 const STATUS_HEX: Record<OrderStatus, string> = {
@@ -28,6 +30,7 @@ const STATUS_HEX: Record<OrderStatus, string> = {
   Shipped: "#142B4A",
   Completed: "#16845B",
   Cancelled: "#C2413B",
+  Returned: "#66758A",
 };
 
 const CUSTOMER_CANCELLABLE_STATUSES: ReadonlySet<OrderStatus> = new Set(["PendingStock", "AwaitingPayment", "Confirmed"]);

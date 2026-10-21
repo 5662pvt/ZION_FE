@@ -1,6 +1,6 @@
 import type { PaymentChannel } from "@/types/payments";
 
-export type AdminPaymentStatus = "Pending" | "Succeeded" | "Failed" | "Expired" | "Cancelled";
+export type AdminPaymentStatus = "Pending" | "Succeeded" | "Failed" | "Expired" | "Cancelled" | "Refunded";
 
 export interface AdminPaymentDto {
   id: string;

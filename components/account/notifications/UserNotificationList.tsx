@@ -4,7 +4,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, Flex, List, Pagination, Segmented, Skeleton, Typography } from "antd";
 import dayjs from "dayjs";
-import { FiCheckCircle, FiCreditCard, FiPackage, FiTruck, FiXCircle } from "react-icons/fi";
+import { FiCheckCircle, FiCreditCard, FiDollarSign, FiPackage, FiRotateCcw, FiTruck, FiXCircle } from "react-icons/fi";
 import { useNotificationFeed } from "@/hooks/useNotificationFeed";
 import { useMarkNotificationRead } from "@/hooks/useMarkNotificationRead";
 import { useMarkAllNotificationsRead } from "@/hooks/useMarkAllNotificationsRead";
@@ -25,6 +25,11 @@ const TYPE_META: Record<UserNotificationType, { label: string; icon: ReactNode; 
   PaymentFailed: { label: "Thanh toán thất bại", icon: <FiCreditCard aria-hidden />, color: "var(--color-danger)" },
   OrderCreatedForReview: { label: "Đơn hàng mới cần xử lý", icon: <FiPackage aria-hidden />, color: "var(--color-primary)" },
   OrderCompleted: { label: "Đơn hàng đã hoàn tất", icon: <FiCheckCircle aria-hidden />, color: "var(--color-success)" },
+  ReturnRequested: { label: "Yêu cầu trả hàng", icon: <FiRotateCcw aria-hidden />, color: "var(--color-primary)" },
+  ReturnApproved: { label: "Yêu cầu trả hàng được duyệt", icon: <FiCheckCircle aria-hidden />, color: "var(--color-success)" },
+  ReturnRejected: { label: "Yêu cầu trả hàng bị từ chối", icon: <FiXCircle aria-hidden />, color: "var(--color-danger)" },
+  ReturnShippedBack: { label: "Đã gửi hàng trả lại", icon: <FiTruck aria-hidden />, color: "var(--color-primary)" },
+  ReturnRefunded: { label: "Đã hoàn tiền", icon: <FiDollarSign aria-hidden />, color: "var(--color-success)" },
 };
 
 export default function UserNotificationList() {

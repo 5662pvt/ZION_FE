@@ -19,6 +19,7 @@ import {
   FiLogOut,
   FiMenu,
   FiPercent,
+  FiRotateCcw,
   FiShoppingCart,
   FiStar,
   FiTag,
@@ -76,6 +77,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Bán hàng",
     items: [
       { key: "orders", href: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
+      { key: "returns", href: "/admin/returns", icon: <FiRotateCcw />, label: "Trả hàng" },
       { key: "promotions", href: "/admin/promotions", icon: <FiPercent />, label: "Khuyến mãi" },
       { key: "flash-sales", href: "/admin/flash-sales", icon: <FiZap />, label: "Flash Sale" },
       { key: "reviews", href: "/admin/reviews", icon: <FiStar />, label: "Đánh giá" },

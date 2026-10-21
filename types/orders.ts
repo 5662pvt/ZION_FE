@@ -1,4 +1,5 @@
 import type { OrderHistoryEntry } from "@/types/adminOrders";
+import type { ReturnRequestDto } from "@/types/returns";
 
 export type OrderStatus =
   | "PendingStock"
@@ -7,7 +8,8 @@ export type OrderStatus =
   | "Paid"
   | "Shipped"
   | "Completed"
-  | "Cancelled";
+  | "Cancelled"
+  | "Returned";
 
 export type PaymentMethod = "COD" | "Online";
 
@@ -49,6 +51,7 @@ export interface OrderDto {
   shippingAddress: ShippingAddressDto;
   lines: OrderLineDto[];
   history: OrderHistoryEntry[];
+  returnRequest: ReturnRequestDto | null;
 }
 
 export interface OrderSummaryDto {

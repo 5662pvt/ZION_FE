@@ -10,7 +10,7 @@ import { ApiError } from "@/services/apiClient";
 import { paymentMethodLabel } from "@/utils/orderStatus";
 import { formatVnd } from "@/utils/money";
 import { formatAddress } from "@/utils/address";
-import { OrderStatusBadge, StatusBadge } from "@/components/ui/StatusBadge";
+import { OrderStatusBadge, ReturnStatusBadge, StatusBadge } from "@/components/ui/StatusBadge";
 import type { OrderLineDto } from "@/types/orders";
 
 const { Title, Text } = Typography;
@@ -139,6 +139,21 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
           </Flex>
         </div>
       </Flex>
+
+      {order.returnRequest && (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={
+            <Flex align="center" gap={12} wrap="wrap">
+              <span>Đơn hàng có yêu cầu trả hàng</span>
+              <ReturnStatusBadge status={order.returnRequest.status} />
+              <Link href={`/admin/returns/${order.returnRequest.id}`}>Xem chi tiết</Link>
+            </Flex>
+          }
+        />
+      )}
 
       <AdminOrderActions order={order} />
 

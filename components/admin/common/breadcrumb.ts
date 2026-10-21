@@ -7,6 +7,7 @@ const SECTION_LABELS: Record<string, string> = {
   products: "Sản phẩm",
   categories: "Danh mục",
   orders: "Đơn hàng",
+  returns: "Trả hàng",
   inventory: "Tồn kho",
   promotions: "Khuyến mãi",
   "flash-sales": "Flash Sale",
@@ -55,6 +56,8 @@ export function resolveBreadcrumb(pathname: string): BreadcrumbItem[] {
     items.push({ label: rest[0] === "new" ? "Tạo khuyến mãi" : "Chi tiết khuyến mãi" });
   } else if (section === "orders") {
     items.push({ label: "Chi tiết đơn hàng" });
+  } else if (section === "returns") {
+    items.push({ label: "Chi tiết trả hàng" });
   }
 
   return items;

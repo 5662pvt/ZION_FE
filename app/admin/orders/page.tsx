@@ -23,6 +23,7 @@ const STATUS_VALUES: OrderStatus[] = [
   "Shipped",
   "Completed",
   "Cancelled",
+  "Returned",
 ];
 
 const STATUS_OPTIONS = STATUS_VALUES.map((value) => ({ value, label: orderStatusLabel(value) }));
