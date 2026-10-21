@@ -5,6 +5,7 @@ import type {
   AvailabilityDto,
   InventoryItemDto,
   InventoryListParams,
+  ProductAvailabilityDto,
   StockMovementDto,
   StockMovementsParams,
 } from "@/types/inventory";
@@ -52,4 +53,27 @@ export const inventoryService = {
     apiGet<AvailabilityDto[]>(`/api/v1/inventory/availability?productIds=${encodeURIComponent(productIds.join(","))}`).then(
       (r) => r.data,
     ),
+
+  getVariantAvailability: (variantId: string) =>
+    apiGet<AvailabilityDto>(`/api/v1/inventory/variants/${variantId}`).then((r) => r.data),
+
+  getAvailabilityByVariants: (variantIds: string[]) =>
+    apiGet<AvailabilityDto[]>(
+      `/api/v1/inventory/availability/variants?variantIds=${encodeURIComponent(variantIds.join(","))}`,
+    ).then((r) => r.data),
+
+  getAvailabilityByProducts: (productIds: string[]) =>
+    apiGet<ProductAvailabilityDto[]>(
+      `/api/v1/inventory/availability/products?productIds=${encodeURIComponent(productIds.join(","))}`,
+    ).then((r) => r.data),
+
+  variantMovements: async (variantId: string, params: StockMovementsParams = {}): Promise<Paged<StockMovementDto>> => {
+    const { data, pagination } = await apiGet<StockMovementDto[]>(
+      `/api/v1/inventory/variants/${variantId}/movements${buildMovementsQuery(params)}`,
+    );
+    return { items: data, pagination: pagination as NonNullable<typeof pagination> };
+  },
+
+  adjustVariant: (variantId: string, body: AdjustStockRequest) =>
+    apiPost<InventoryItemDto>(`/api/v1/inventory/variants/${variantId}/adjust`, body).then((r) => r.data),
 };

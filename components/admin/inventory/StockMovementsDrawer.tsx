@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 import { Alert, Drawer, Table, type TableProps } from "antd";
-import { useStockMovements } from "@/hooks/useAdminInventory";
+import { useVariantStockMovements } from "@/hooks/useAdminInventory";
 import type { InventoryItemDto, StockMovementDto, StockMovementType } from "@/types/inventory";
 
 const MOVEMENT_TYPE_LABEL: Record<StockMovementType, string> = {
@@ -25,7 +25,7 @@ export default function StockMovementsDrawer({ open, item, onClose }: StockMovem
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading, isError } = useStockMovements(item?.productId ?? "", { page, pageSize });
+  const { data, isLoading, isError } = useVariantStockMovements(item?.variantId ?? "", { page, pageSize });
 
   const columns: TableProps<StockMovementDto>["columns"] = [
     {
@@ -45,7 +45,7 @@ export default function StockMovementsDrawer({ open, item, onClose }: StockMovem
 
   return (
     <Drawer
-      title={item ? `Lịch sử tồn kho — ${item.productName}` : "Lịch sử tồn kho"}
+      title={item ? `Lịch sử tồn kho — ${item.productName}${item.variantLabel ? ` (${item.variantLabel})` : ""}` : "Lịch sử tồn kho"}
       open={open}
       onClose={onClose}
       width={640}

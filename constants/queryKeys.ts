@@ -54,8 +54,14 @@ export const queryKeys = {
     list: (filters: InventoryListParams) => ["inventory", "list", filters] as const,
     movements: (productId: string, params: StockMovementsParams) =>
       ["inventory", "movements", productId, params] as const,
+    variantMovements: (variantId: string, params: StockMovementsParams) =>
+      ["inventory", "variantMovements", variantId, params] as const,
     availability: (productId: string) => ["inventory", "availability", productId] as const,
     availabilityBatch: (productIds: string[]) => ["inventory", "availability", "batch", productIds] as const,
+    variantAvailabilityBatch: (variantIds: string[]) =>
+      ["inventory", "availability", "variants", "batch", variantIds] as const,
+    productAvailabilitySummary: (productIds: string[]) =>
+      ["inventory", "availability", "products", "batch", productIds] as const,
   },
   promotions: {
     list: (filters: PromotionListParams) => ["promotions", "list", filters] as const,

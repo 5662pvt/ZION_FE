@@ -8,6 +8,7 @@ import type {
   ProductListParams,
   ProductSuggestionDto,
   ProductSummaryDto,
+  SetVariantsRequest,
   UpdateProductRequest,
 } from "@/types/products";
 
@@ -58,6 +59,9 @@ export const productsService = {
 
   update: (id: string, body: UpdateProductRequest) =>
     apiPut<ProductDto>(`/api/v1/products/${id}`, body).then((r) => r.data),
+
+  setVariants: (id: string, body: SetVariantsRequest) =>
+    apiPut<ProductDto>(`/api/v1/products/${id}/variants`, body).then((r) => r.data),
 
   archive: (id: string) => apiPost<ProductDto>(`/api/v1/products/${id}/archive`).then((r) => r.data),
 

@@ -21,8 +21,11 @@ export default function LowStockWidget() {
         <List
           dataSource={data.items}
           renderItem={(item) => (
-            <List.Item key={item.productId}>
-              <List.Item.Meta title={item.productName} description={`SKU: ${item.sku}`} />
+            <List.Item key={item.variantId}>
+              <List.Item.Meta
+                title={item.variantLabel ? `${item.productName} — ${item.variantLabel}` : item.productName}
+                description={`SKU: ${item.sku}`}
+              />
               <Typography.Text type="danger">
                 Còn {item.available} / ngưỡng {item.lowStockThreshold}
               </Typography.Text>

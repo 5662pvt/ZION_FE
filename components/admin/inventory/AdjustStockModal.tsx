@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Form, Input, InputNumber, Modal, Radio, Typography } from "antd";
-import { useAdjustStock } from "@/hooks/useAdminInventory";
+import { useAdjustVariantStock } from "@/hooks/useAdminInventory";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
 import type { InventoryItemDto } from "@/types/inventory";
@@ -29,7 +29,7 @@ export default function AdjustStockModal({ open, item, onClose }: AdjustStockMod
   const direction: AdjustDirection = Form.useWatch("direction", form) ?? "increase";
   const quantity: number | undefined = Form.useWatch("quantity", form);
   const queryClient = useQueryClient();
-  const adjustMutation = useAdjustStock();
+  const adjustMutation = useAdjustVariantStock();
 
   useEffect(() => {
     if (open) {
@@ -47,7 +47,7 @@ export default function AdjustStockModal({ open, item, onClose }: AdjustStockMod
     const appliedDelta = values.direction === "decrease" ? -values.quantity : values.quantity;
     try {
       await adjustMutation.mutateAsync({
-        productId: item.productId,
+        variantId: item.variantId,
         body: { delta: appliedDelta, reason: values.reason.trim() },
       });
       toast.success("Đã điều chỉnh tồn kho");
@@ -65,7 +65,7 @@ export default function AdjustStockModal({ open, item, onClose }: AdjustStockMod
   return (
     <Modal
       open={open}
-      title={`Điều chỉnh tồn kho — ${item.productName}`}
+      title={`Điều chỉnh tồn kho — ${item.productName}${item.variantLabel ? ` (${item.variantLabel})` : ""}`}
       onCancel={onClose}
       onOk={() => form.submit()}
       confirmLoading={adjustMutation.isPending}

@@ -51,7 +51,15 @@ export default function ProductTable({ items, loading, pagination, onPageChange 
     },
     { title: "Tên", dataIndex: "name" },
     { title: "SKU", dataIndex: "sku" },
-    { title: "Giá", dataIndex: "price", render: (price: number) => formatVnd(price) },
+    {
+      title: "Giá",
+      key: "price",
+      render: (_, record) =>
+        record.minPrice !== record.maxPrice
+          ? `${formatVnd(record.minPrice)} – ${formatVnd(record.maxPrice)}`
+          : formatVnd(record.price),
+    },
+    { title: "Phân loại", dataIndex: "variantCount", align: "right" },
     { title: "Danh mục", dataIndex: "categoryName", render: (v: string | null) => v ?? "—" },
     {
       title: "Trạng thái",
@@ -98,7 +106,14 @@ export default function ProductTable({ items, loading, pagination, onPageChange 
           status={<ProductStatusBadge status={record.status as ProductStatus} />}
           fields={[
             { label: "SKU", value: record.sku },
-            { label: "Giá", value: formatVnd(record.price) },
+            {
+              label: "Giá",
+              value:
+                record.minPrice !== record.maxPrice
+                  ? `${formatVnd(record.minPrice)} – ${formatVnd(record.maxPrice)}`
+                  : formatVnd(record.price),
+            },
+            { label: "Phân loại", value: record.variantCount },
             { label: "Danh mục", value: record.categoryName ?? "—" },
           ]}
           action={

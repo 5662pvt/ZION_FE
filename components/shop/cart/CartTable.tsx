@@ -133,6 +133,13 @@ export default function CartTable({ items, availability, loading = false }: Cart
           )}
           <div style={{ minWidth: 0 }}>
             {item.productSlug ? <Link href={`/products/${item.productSlug}`}>{name}</Link> : <Text>{name}</Text>}
+            {item.variantLabel && (
+              <div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Phân loại: {item.variantLabel}
+                </Text>
+              </div>
+            )}
             <div>
               <Text type="secondary">{formatVnd(item.unitPrice)}</Text>
             </div>
@@ -144,7 +151,7 @@ export default function CartTable({ items, availability, loading = false }: Cart
       title: "Số lượng",
       key: "quantity",
       render: (_, item) => {
-        const available = availability?.[item.productId]?.available;
+        const available = availability?.[item.variantId]?.available;
         const overLimit = available !== undefined && item.quantity > available;
         return (
           <div>

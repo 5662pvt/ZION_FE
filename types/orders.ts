@@ -31,6 +31,9 @@ export interface OrderLineDto {
   quantity: number;
   lineTotal: number;
   isGift: boolean;
+  variantId: string;
+  variantLabel: string | null;
+  sku: string | null;
 }
 
 export interface OrderDto {

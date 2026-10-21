@@ -26,6 +26,9 @@ export default function WishlistList() {
     status: "Published",
     categoryName: null,
     primaryImageUrl: item.thumbnailUrl,
+    minPrice: item.price,
+    maxPrice: item.price,
+    variantCount: 1,
   }));
 
   function updatePage(nextPage: number, nextPageSize: number) {

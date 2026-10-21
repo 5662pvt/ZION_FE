@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { Button, Col, Result, Row, Skeleton } from "antd";
 import Breadcrumbs from "@/components/shop/layout/Breadcrumbs";
@@ -17,6 +17,7 @@ interface ProductDetailPageProps {
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = use(params);
   const { data: product, isLoading, isError, error, refetch } = useProductBySlug(slug);
+  const [variantImageUrl, setVariantImageUrl] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -79,10 +80,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       />
       <Row gutter={32}>
         <Col xs={24} md={12}>
-          <ProductGallery images={product.images} name={product.name} />
+          <ProductGallery images={product.images} name={product.name} activeOverrideUrl={variantImageUrl} />
         </Col>
         <Col xs={24} md={12}>
-          <ProductDetail product={product} />
+          <ProductDetail product={product} onVariantImageChange={setVariantImageUrl} />
         </Col>
       </Row>
       <style>{`

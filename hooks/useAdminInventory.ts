@@ -29,3 +29,23 @@ export function useAdjustStock() {
     },
   });
 }
+
+export function useVariantStockMovements(variantId: string, params: StockMovementsParams) {
+  return useQuery({
+    queryKey: queryKeys.inventory.variantMovements(variantId, params),
+    queryFn: () => inventoryService.variantMovements(variantId, params),
+    enabled: !!variantId,
+  });
+}
+
+export function useAdjustVariantStock() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ variantId, body }: { variantId: string; body: AdjustStockRequest }) =>
+      inventoryService.adjustVariant(variantId, body),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory", "variantMovements", variables.variantId] });
+    },
+  });
+}

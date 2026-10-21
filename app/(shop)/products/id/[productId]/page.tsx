@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Spin } from "antd";
 import { productsService } from "@/services/products.service";
@@ -14,14 +14,18 @@ interface ProductByIdRedirectPageProps {
 export default function ProductByIdRedirectPage({ params }: ProductByIdRedirectPageProps) {
   const { productId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const variantId = searchParams.get("variant");
   const { data: product, error } = useQuery({
     queryKey: ["products", "byId", productId],
     queryFn: () => productsService.getById(productId),
   });
 
   useEffect(() => {
-    if (product) router.replace(`/products/${product.slug}#reviews`);
-  }, [product, router]);
+    if (!product) return;
+    const suffix = variantId ? `?variant=${encodeURIComponent(variantId)}` : "#reviews";
+    router.replace(`/products/${product.slug}${suffix}`);
+  }, [product, router, variantId]);
 
   if (error) {
     return (

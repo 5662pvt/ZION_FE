@@ -7,11 +7,27 @@ import type { ProductImageDto } from "@/types/products";
 interface ProductGalleryProps {
   images: ProductImageDto[];
   name: string;
+  activeOverrideUrl?: string | null;
 }
 
-export default function ProductGallery({ images, name }: ProductGalleryProps) {
+export default function ProductGallery({ images, name, activeOverrideUrl }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const active = images[activeIndex];
+  const [manualUrl, setManualUrl] = useState<string | null>(null);
+  const normalizedOverrideUrl = activeOverrideUrl ?? null;
+  const [lastSeenOverrideUrl, setLastSeenOverrideUrl] = useState(normalizedOverrideUrl);
+
+  if (normalizedOverrideUrl !== lastSeenOverrideUrl) {
+    setLastSeenOverrideUrl(normalizedOverrideUrl);
+    setManualUrl(null);
+  }
+
+  const overrideUrl = manualUrl ? null : normalizedOverrideUrl;
+  const active = overrideUrl ? { id: "variant-image", url: overrideUrl, alt: name, displayOrder: -1 } : images[activeIndex];
+
+  function handleSelectThumbnail(index: number) {
+    setActiveIndex(index);
+    setManualUrl(images[index]?.url ?? null);
+  }
 
   return (
     <div>
@@ -42,14 +58,14 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
               key={image.id}
               type="button"
               aria-label={`Xem ảnh ${index + 1} của ${name}`}
-              aria-pressed={index === activeIndex}
-              onClick={() => setActiveIndex(index)}
+              aria-pressed={!overrideUrl && index === activeIndex}
+              onClick={() => handleSelectThumbnail(index)}
               style={{
                 cursor: "pointer",
                 padding: 0,
                 lineHeight: 0,
                 background: "none",
-                border: index === activeIndex ? "2px solid var(--color-action)" : "2px solid transparent",
+                border: !overrideUrl && index === activeIndex ? "2px solid var(--color-action)" : "2px solid transparent",
                 borderRadius: 4,
               }}
             >

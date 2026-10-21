@@ -15,7 +15,7 @@ export default function GiftPreview() {
     <Card title="Quà tặng kèm" size="small" style={{ marginTop: 16 }}>
       <Space direction="vertical" size={12} style={{ width: "100%" }}>
         {gifts.map((gift) => (
-          <Flex key={`${gift.promotionId}-${gift.productId}`} gap={12} align="flex-start">
+          <Flex key={`${gift.promotionId}-${gift.variantId}`} gap={12} align="flex-start">
             {gift.imageUrl ? (
               <Image
                 src={gift.imageUrl}
@@ -37,6 +37,13 @@ export default function GiftPreview() {
                   {gift.available ? "Quà tặng" : "Hết quà"}
                 </StatusBadge>
               </Flex>
+              {gift.variantLabel && (
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Phân loại: {gift.variantLabel}
+                  </Text>
+                </div>
+              )}
               <div>
                 <Text type="secondary" style={{ fontSize: 12 }}>
                   {gift.promotionName}

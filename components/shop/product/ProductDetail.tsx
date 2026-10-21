@@ -1,33 +1,80 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Space, Typography } from "antd";
 import { FiRefreshCw, FiTruck } from "react-icons/fi";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import StickyBuyBar from "@/components/shop/product/StickyBuyBar";
+import VariantSelector from "@/components/shop/product/VariantSelector";
 import ProductTabs from "@/components/shop/product/ProductTabs";
 import WishlistButton from "@/components/shop/product/WishlistButton";
 import { useAddToCart } from "@/hooks/useCart";
-import { useProductAvailability } from "@/hooks/useAvailability";
-import { useActiveFlashSaleForProduct } from "@/hooks/useFlashSales";
+import { useProductAvailability, useVariantAvailability } from "@/hooks/useAvailability";
+import { useActiveFlashSaleForProduct, useActiveFlashSaleForVariant } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "@/components/shop/home/FlashSaleCountdown";
 import { toast } from "@/utils/toast";
 import { ApiError } from "@/services/apiClient";
+import { formatVnd } from "@/utils/money";
 import Price from "@/components/ui/Price";
 import { StatusBadge, StockLevelBadge } from "@/components/ui/StatusBadge";
-import type { ProductDto } from "@/types/products";
+import type { ProductDto, ProductVariantDto } from "@/types/products";
 
 const { Title, Text } = Typography;
 
 interface ProductDetailProps {
   product: ProductDto;
+  onVariantImageChange?: (imageUrl: string | null) => void;
 }
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+function variantFromSelection(product: ProductDto, selected: (string | null)[]): ProductVariantDto | undefined {
+  return product.variants.find(
+    (v) =>
+      v.isActive &&
+      v.option1Value === selected[0] &&
+      (product.options.length < 2 || v.option2Value === selected[1])
+  );
+}
+
+export default function ProductDetail({ product, onVariantImageChange }: ProductDetailProps) {
   const router = useRouter();
-  const { data: availability } = useProductAvailability(product.id);
-  const { item: flashSaleItem } = useActiveFlashSaleForProduct(product.id);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const hasOptions = product.options.length > 0;
+
+  const [selected, setSelected] = useState<(string | null)[]>(() => {
+    if (!hasOptions) return [];
+    const fromQuery = product.variants.find((v) => v.id === searchParams.get("variant") && v.isActive);
+    return product.options.map((_, index) => (fromQuery ? (index === 0 ? fromQuery.option1Value : fromQuery.option2Value) : null));
+  });
+
+  const selectedVariant = hasOptions ? variantFromSelection(product, selected) : product.variants[0];
+  const allOptionsSelected = hasOptions ? selected.every((value) => !!value) : true;
+  const needsSelection = hasOptions && !(allOptionsSelected && selectedVariant);
+
+  useEffect(() => {
+    onVariantImageChange?.(selectedVariant?.imageUrl ?? null);
+  }, [selectedVariant?.imageUrl, onVariantImageChange]);
+
+  useEffect(() => {
+    if (!hasOptions) return;
+    const sp = new URLSearchParams(searchParams.toString());
+    if (selectedVariant) sp.set("variant", selectedVariant.id);
+    else sp.delete("variant");
+    router.replace(`${pathname}?${sp.toString()}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVariant?.id]);
+
+  const variantIds = useMemo(() => product.variants.map((v) => v.id), [product.variants]);
+  const { data: variantAvailability } = useVariantAvailability(hasOptions ? variantIds : []);
+  const { data: singleAvailability } = useProductAvailability(hasOptions ? "" : product.id);
+
+  const { item: flashSaleItemByProduct } = useActiveFlashSaleForProduct(hasOptions ? "" : product.id);
+  const { item: flashSaleItemByVariant } = useActiveFlashSaleForVariant(hasOptions && selectedVariant ? selectedVariant.id : "");
+  const flashSaleItem = hasOptions ? flashSaleItemByVariant : flashSaleItemByProduct;
+
+  const availability = hasOptions ? (selectedVariant ? variantAvailability?.[selectedVariant.id] : undefined) : singleAvailability;
+
   const addToCart = useAddToCart();
   const [quantity, setQuantity] = useState(1);
   const [intent, setIntent] = useState<"idle" | "add" | "buyNow">("idle");
@@ -36,43 +83,59 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const available = availability?.available;
   const outOfStock = inStock === false;
 
+  function handleSelectOption(optionIndex: number, value: string) {
+    setSelected((prev) => {
+      const next = [...prev];
+      next[optionIndex] = value;
+      return next;
+    });
+  }
+
+  function cartPayload() {
+    return hasOptions && selectedVariant ? { variantId: selectedVariant.id, quantity } : { productId: product.id, quantity };
+  }
+
   function handleAdd() {
     if (addToCart.isPending) return;
+    if (needsSelection) {
+      toast.error("Vui lòng chọn phân loại hàng");
+      return;
+    }
     setIntent("add");
-    addToCart.mutate(
-      { productId: product.id, quantity },
-      {
-        onSuccess: () => toast.success("Đã thêm vào giỏ · Xem giỏ", { onClick: () => router.push("/cart") }),
-        onError: (err) => toast.error(err instanceof ApiError ? err.message : "Thêm vào giỏ thất bại"),
-        onSettled: () => setIntent("idle"),
-      }
-    );
+    addToCart.mutate(cartPayload(), {
+      onSuccess: () => toast.success("Đã thêm vào giỏ · Xem giỏ", { onClick: () => router.push("/cart") }),
+      onError: (err) => toast.error(err instanceof ApiError ? err.message : "Thêm vào giỏ thất bại"),
+      onSettled: () => setIntent("idle"),
+    });
   }
 
   function handleBuyNow() {
     if (addToCart.isPending) return;
+    if (needsSelection) {
+      toast.error("Vui lòng chọn phân loại hàng");
+      return;
+    }
     setIntent("buyNow");
-    addToCart.mutate(
-      { productId: product.id, quantity },
-      {
-        onSuccess: () => router.push("/checkout"),
-        onError: (err) => {
-          toast.error(err instanceof ApiError ? err.message : "Thêm vào giỏ thất bại");
-          setIntent("idle");
-        },
-      }
-    );
+    addToCart.mutate(cartPayload(), {
+      onSuccess: () => router.push("/checkout"),
+      onError: (err) => {
+        toast.error(err instanceof ApiError ? err.message : "Thêm vào giỏ thất bại");
+        setIntent("idle");
+      },
+    });
   }
 
   const isAdding = addToCart.isPending && intent === "add";
   const isBuyingNow = addToCart.isPending && intent === "buyNow";
+
+  const skuToShow = hasOptions ? selectedVariant?.sku ?? product.sku : product.sku;
 
   return (
     <div>
       <Title level={1} style={{ fontSize: 24, marginBottom: 4 }}>
         {product.name}
       </Title>
-      <Text type="secondary">Mã SP: {product.sku}</Text>
+      <Text type="secondary">Mã SP: {skuToShow}</Text>
       {product.brand && (
         <div>
           <Text type="secondary">Thương hiệu: {product.brand}</Text>
@@ -88,12 +151,32 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <Text type="secondary">Còn {flashSaleItem.available} suất</Text>
             </Space>
           </Space>
+        ) : needsSelection ? (
+          product.minPrice === product.maxPrice ? (
+            <Price value={product.minPrice} size="large" />
+          ) : (
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-text)" }}>
+              {formatVnd(product.minPrice)} – {formatVnd(product.maxPrice)}
+            </span>
+          )
         ) : (
-          <Price value={product.price} size="large" />
+          <Price value={hasOptions && selectedVariant ? selectedVariant.price : product.price} size="large" />
         )}
       </div>
 
-      {inStock !== undefined && (
+      {hasOptions && (
+        <div style={{ marginBottom: 20 }}>
+          <VariantSelector
+            options={product.options}
+            variants={product.variants}
+            availability={variantAvailability}
+            selected={selected}
+            onChange={handleSelectOption}
+          />
+        </div>
+      )}
+
+      {!needsSelection && inStock !== undefined && (
         <div style={{ marginBottom: 16 }}>
           {outOfStock ? (
             <StockLevelBadge level="OutOfStock" />
@@ -112,6 +195,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             onQuantityChange={setQuantity}
             max={available}
             outOfStock={outOfStock}
+            needsSelection={needsSelection}
             isAdding={isAdding}
             isBuyingNow={isBuyingNow}
             onAdd={handleAdd}
@@ -136,6 +220,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
       <StickyBuyBar
         outOfStock={outOfStock}
+        needsSelection={needsSelection}
         isAdding={isAdding}
         isBuyingNow={isBuyingNow}
         onAdd={handleAdd}

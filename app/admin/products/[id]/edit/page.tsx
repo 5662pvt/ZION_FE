@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { Alert, Button, Popconfirm, Space, Spin } from "antd";
 import ProductForm from "@/components/admin/products/ProductForm";
 import ProductImageManager from "@/components/admin/products/ProductImageManager";
+import VariantEditor from "@/components/admin/products/VariantEditor";
 import { useAdminProduct, useArchiveProduct, usePublishProduct } from "@/hooks/useAdminProducts";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
@@ -61,6 +62,9 @@ export default function EditProductPage() {
       />
 
       <ProductForm mode="edit" product={product} />
+
+      <h2>Phân loại hàng</h2>
+      <VariantEditor product={product} />
 
       <h2>Hình ảnh</h2>
       <ProductImageManager productId={product.id} images={product.images} />

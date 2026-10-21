@@ -79,10 +79,19 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
       title: "Sản phẩm",
       dataIndex: "productName",
       render: (name: string, record) => (
-        <Space size={6}>
-          <span>{name}</span>
-          {record.isGift && <StatusBadge color="var(--color-warning)">Quà tặng</StatusBadge>}
-        </Space>
+        <div>
+          <Space size={6}>
+            <span>{name}</span>
+            {record.isGift && <StatusBadge color="var(--color-warning)">Quà tặng</StatusBadge>}
+          </Space>
+          {record.variantLabel && (
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Phân loại: {record.variantLabel}
+              </Text>
+            </div>
+          )}
+        </div>
       ),
     },
     {
@@ -160,7 +169,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
       )}
 
       <Table<OrderLineDto>
-        rowKey="productId"
+        rowKey="variantId"
         dataSource={order.lines}
         columns={lineColumns}
         pagination={false}

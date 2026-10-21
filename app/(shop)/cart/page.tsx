@@ -2,7 +2,7 @@
 
 import { Col, Row, Skeleton } from "antd";
 import { useCart } from "@/hooks/useCart";
-import { useAvailabilityBatch } from "@/hooks/useAvailability";
+import { useVariantAvailability } from "@/hooks/useAvailability";
 import CartTable from "@/components/shop/cart/CartTable";
 import CartSummary from "@/components/shop/cart/CartSummary";
 import EmptyCart from "@/components/shop/cart/EmptyCart";
@@ -10,8 +10,8 @@ import ErrorState from "@/components/ui/ErrorState";
 
 export default function CartPage() {
   const { data: cart, isCartLoading, isError, refetch } = useCart();
-  const productIds = cart ? Array.from(new Set(cart.items.map((item) => item.productId))) : [];
-  const { data: availability } = useAvailabilityBatch(productIds);
+  const variantIds = cart ? Array.from(new Set(cart.items.map((item) => item.variantId))) : [];
+  const { data: availability } = useVariantAvailability(variantIds);
 
   if (isCartLoading) {
     return (
@@ -45,7 +45,7 @@ export default function CartPage() {
   }
 
   const overLimitCount = cart.items.filter((item) => {
-    const avail = availability?.[item.productId];
+    const avail = availability?.[item.variantId];
     return avail !== undefined && item.quantity > avail.available;
   }).length;
 

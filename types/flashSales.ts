@@ -1,5 +1,8 @@
 export interface ActiveFlashSaleItemDto {
   productId: string;
+  variantId: string;
+  variantLabel: string | null;
+  sku: string | null;
   productName: string;
   imageUrl: string | null;
   flashPrice: number;
@@ -20,6 +23,9 @@ export interface ActiveFlashSaleDto {
 export interface FlashSaleItemDto {
   id: string;
   productId: string;
+  variantId: string;
+  variantLabel: string | null;
+  sku: string | null;
   flashPrice: number;
   allocatedQuantity: number;
   soldQuantity: number;
@@ -57,7 +63,8 @@ export interface FlashSaleUpsertRequest {
 }
 
 export interface AddFlashSaleItemRequest {
-  productId: string;
+  productId?: string;
+  variantId?: string;
   flashPrice: number;
   allocatedQuantity: number;
 }

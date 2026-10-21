@@ -3,7 +3,7 @@ import ProductCard from "./ProductCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import ErrorState from "@/components/ui/ErrorState";
-import { useAvailabilityBatch } from "@/hooks/useAvailability";
+import { useProductAvailabilitySummary } from "@/hooks/useAvailability";
 import { useReviewSummaries } from "@/hooks/useReviews";
 import type { ProductSummaryDto } from "@/types/products";
 
@@ -41,7 +41,7 @@ export default function ProductGrid({
   pagination,
 }: ProductGridProps) {
   const ids = items.map((item) => item.id);
-  const { data: availability } = useAvailabilityBatch(ids);
+  const { data: availability } = useProductAvailabilitySummary(ids);
   const { data: reviewSummaries } = useReviewSummaries(ids);
 
   if (isError) {

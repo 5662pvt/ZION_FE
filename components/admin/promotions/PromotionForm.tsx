@@ -9,6 +9,7 @@ import { useCreatePromotion, useUpdatePromotion } from "@/hooks/useAdminPromotio
 import { useCategoryTree } from "@/hooks/useCategories";
 import { productsService } from "@/services/products.service";
 import { ApiError } from "@/services/apiClient";
+import { formatVnd } from "@/utils/money";
 import { toast } from "@/utils/toast";
 import type { PromotionDto, PromotionScope, PromotionType, PromotionUpsertRequest } from "@/types/promotions";
 
@@ -16,6 +17,7 @@ const { RangePicker } = DatePicker;
 
 interface GiftItemFormValue {
   productId: string;
+  variantId: string;
   quantity: number;
 }
 
@@ -57,6 +59,10 @@ function productLabel(product: { name: string; sku: string }): string {
   return `${product.name} (${product.sku})`;
 }
 
+function variantLabel(variant: { label: string; sku: string; price: number }): string {
+  return `${variant.label} — ${variant.sku} — ${formatVnd(variant.price)}`;
+}
+
 interface PromotionFormProps {
   mode: "create" | "edit";
   promotion?: PromotionDto;
@@ -79,6 +85,33 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
   const [productKeyword, setProductKeyword] = useState("");
   const [productSearchOptions, setProductSearchOptions] = useState<{ value: string; label: string }[]>([]);
   const [productSearchLoading, setProductSearchLoading] = useState(false);
+  const [variantOptionsByProduct, setVariantOptionsByProduct] = useState<Record<string, { value: string; label: string }[]>>({});
+  const [variantsLoadingByProduct, setVariantsLoadingByProduct] = useState<Record<string, boolean>>({});
+
+  function loadVariantsForProduct(productId: string): Promise<{ value: string; label: string }[]> {
+    const cached = variantOptionsByProduct[productId];
+    if (cached) return Promise.resolve(cached);
+    setVariantsLoadingByProduct((prev) => ({ ...prev, [productId]: true }));
+    return productsService
+      .adminGetById(productId)
+      .then((product) => {
+        const options = product.variants.filter((v) => v.isActive).map((v) => ({ value: v.id, label: variantLabel(v) }));
+        setVariantOptionsByProduct((prev) => ({ ...prev, [productId]: options }));
+        return options;
+      })
+      .catch(() => [] as { value: string; label: string }[])
+      .finally(() => setVariantsLoadingByProduct((prev) => ({ ...prev, [productId]: false })));
+  }
+
+  function handleGiftProductChange(name: number, productId: string) {
+    form.setFieldValue(["giftItems", name, "variantId"], undefined);
+    if (!productId) return;
+    loadVariantsForProduct(productId).then((options) => {
+      if (options.length === 1) {
+        form.setFieldValue(["giftItems", name, "variantId"], options[0].value);
+      }
+    });
+  }
 
   useEffect(() => {
     if (mode === "edit" && promotion) {
@@ -110,6 +143,13 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
               const next = { ...prev };
               products.forEach((p) => {
                 next[p.id] = productLabel(p);
+              });
+              return next;
+            });
+            setVariantOptionsByProduct((prev) => {
+              const next = { ...prev };
+              products.forEach((p) => {
+                next[p.id] = p.variants.filter((v) => v.isActive).map((v) => ({ value: v.id, label: variantLabel(v) }));
               });
               return next;
             });
@@ -197,7 +237,7 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
       targetCategoryIds: values.scope === "Categories" ? values.targetCategoryIds ?? [] : [],
       minQuantity: isGift && values.scope !== "Order" ? values.minQuantity ?? null : null,
       giftItems: isGift
-        ? (values.giftItems ?? []).map((g) => ({ productId: g.productId, quantity: g.quantity }))
+        ? (values.giftItems ?? []).map((g) => ({ productId: g.productId, variantId: g.variantId, quantity: g.quantity }))
         : [],
     };
 
@@ -409,6 +449,21 @@ export default function PromotionForm({ mode, promotion }: PromotionFormProps) {
                         placeholder="Tìm sản phẩm theo tên hoặc SKU"
                         notFoundContent={productSearchLoading ? <Spin size="small" /> : null}
                         style={{ minWidth: 280 }}
+                        onChange={(value) => handleGiftProductChange(name, value)}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "variantId"]}
+                      rules={[{ required: true, message: "Chọn phân loại" }]}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <Select
+                        options={variantOptionsByProduct[giftItemsWatch?.[name]?.productId ?? ""] ?? []}
+                        loading={!!variantsLoadingByProduct[giftItemsWatch?.[name]?.productId ?? ""]}
+                        disabled={!giftItemsWatch?.[name]?.productId}
+                        placeholder="Chọn phân loại"
+                        style={{ minWidth: 220 }}
                       />
                     </Form.Item>
                     <Form.Item

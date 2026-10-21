@@ -2,6 +2,8 @@ export type StockMovementType = "Reserve" | "Release" | "Commit" | "Return" | "A
 
 export interface InventoryItemDto {
   productId: string;
+  variantId: string;
+  variantLabel: string | null;
   sku: string;
   productName: string;
   onHand: number;
@@ -14,6 +16,7 @@ export interface InventoryItemDto {
 export interface StockMovementDto {
   id: string;
   productId: string;
+  variantId: string;
   type: StockMovementType;
   quantity: number;
   reference: string | null;
@@ -22,6 +25,14 @@ export interface StockMovementDto {
 }
 
 export interface AvailabilityDto {
+  productId: string;
+  variantId: string;
+  variantLabel: string | null;
+  available: number;
+  inStock: boolean;
+}
+
+export interface ProductAvailabilityDto {
   productId: string;
   available: number;
   inStock: boolean;

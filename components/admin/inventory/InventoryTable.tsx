@@ -30,7 +30,16 @@ export default function InventoryTable({
 
   const columns: TableProps<InventoryItemDto>["columns"] = [
     { title: "SKU", dataIndex: "sku" },
-    { title: "Tên sản phẩm", dataIndex: "productName" },
+    {
+      title: "Tên sản phẩm",
+      key: "productName",
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <span>{record.productName}</span>
+          {record.variantLabel && <span style={{ fontSize: 12, color: "var(--color-muted)" }}>{record.variantLabel}</span>}
+        </Space>
+      ),
+    },
     { title: "Tồn thực tế", dataIndex: "onHand", align: "right" },
     { title: "Đang giữ", dataIndex: "reserved", align: "right" },
     { title: "Có thể bán", dataIndex: "available", align: "right" },
@@ -64,7 +73,7 @@ export default function InventoryTable({
 
   return (
     <ResponsiveTable<InventoryItemDto>
-      rowKey="productId"
+      rowKey="variantId"
       loading={loading}
       dataSource={items}
       columns={columns}
@@ -73,7 +82,7 @@ export default function InventoryTable({
       onPageChange={onPageChange}
       renderCard={(record) => (
         <ListCard
-          title={record.productName}
+          title={record.variantLabel ? `${record.productName} — ${record.variantLabel}` : record.productName}
           status={
             record.available <= 0 ? (
               <StockLevelBadge level="OutOfStock" />

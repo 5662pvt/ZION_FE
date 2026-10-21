@@ -5,6 +5,24 @@ export interface ProductImageDto {
   displayOrder: number;
 }
 
+export interface ProductOptionDto {
+  name: string;
+  values: string[];
+}
+
+export interface ProductVariantDto {
+  id: string;
+  sku: string;
+  price: number;
+  currency: string;
+  option1Value: string | null;
+  option2Value: string | null;
+  label: string;
+  imageId: string | null;
+  imageUrl: string | null;
+  isActive: boolean;
+}
+
 export interface ProductDto {
   id: string;
   name: string;
@@ -18,6 +36,10 @@ export interface ProductDto {
   categoryName: string | null;
   brand: string | null;
   images: ProductImageDto[];
+  options: ProductOptionDto[];
+  variants: ProductVariantDto[];
+  minPrice: number;
+  maxPrice: number;
 }
 
 export interface ProductSummaryDto {
@@ -30,6 +52,9 @@ export interface ProductSummaryDto {
   status: string;
   categoryName: string | null;
   primaryImageUrl: string | null;
+  minPrice: number;
+  maxPrice: number;
+  variantCount: number;
 }
 
 export interface ProductSuggestionDto {
@@ -40,6 +65,9 @@ export interface ProductSuggestionDto {
   price: number;
   currency: string;
   thumbnailUrl: string | null;
+  minPrice: number;
+  maxPrice: number;
+  variantCount: number;
 }
 
 export interface ProductListParams {
@@ -87,4 +115,25 @@ export interface UpdateProductRequest {
   currency: string;
   categoryId?: string | null;
   brand?: string | null;
+}
+
+export interface SetVariantsOptionRequest {
+  name: string;
+  values: string[];
+}
+
+export interface SetVariantsVariantRequest {
+  id?: string;
+  option1Value?: string | null;
+  option2Value?: string | null;
+  sku: string;
+  price: number;
+  currency: string;
+  isActive: boolean;
+  imageId?: string | null;
+}
+
+export interface SetVariantsRequest {
+  options: SetVariantsOptionRequest[];
+  variants: SetVariantsVariantRequest[];
 }

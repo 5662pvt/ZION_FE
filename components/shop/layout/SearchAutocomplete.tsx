@@ -98,7 +98,9 @@ export default function SearchAutocomplete({
           <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {item.name}
           </span>
-          <span style={{ color: "var(--color-muted)", fontSize: 13, flexShrink: 0 }}>{formatVnd(item.price)}</span>
+          <span style={{ color: "var(--color-muted)", fontSize: 13, flexShrink: 0 }}>
+            {item.minPrice === item.maxPrice ? formatVnd(item.minPrice) : `${formatVnd(item.minPrice)} – ${formatVnd(item.maxPrice)}`}
+          </span>
         </span>
       ),
     }));

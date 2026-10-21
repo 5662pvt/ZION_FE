@@ -4,8 +4,8 @@ import { queryKeys } from "@/constants/queryKeys";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
-function cartSignature(items: { productId: string; quantity: number }[] | undefined): string {
-  return (items ?? []).map((item) => `${item.productId}:${item.quantity}`).join(",");
+function cartSignature(items: { variantId: string; quantity: number }[] | undefined): string {
+  return (items ?? []).map((item) => `${item.variantId}:${item.quantity}`).join(",");
 }
 
 export function useGiftPreview() {

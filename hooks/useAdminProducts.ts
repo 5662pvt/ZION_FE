@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productsService } from "@/services/products.service";
 import { queryKeys } from "@/constants/queryKeys";
-import type { AdminProductListParams, CreateProductRequest, UpdateProductRequest } from "@/types/products";
+import type { AdminProductListParams, CreateProductRequest, SetVariantsRequest, UpdateProductRequest } from "@/types/products";
 
 export function useAdminProducts(params: AdminProductListParams) {
   return useQuery({
@@ -38,6 +38,14 @@ export function useUpdateProduct() {
   const invalidate = useInvalidateAdminProducts();
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: UpdateProductRequest }) => productsService.update(id, body),
+    onSuccess: (_data, variables) => invalidate(variables.id),
+  });
+}
+
+export function useSetVariants() {
+  const invalidate = useInvalidateAdminProducts();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: SetVariantsRequest }) => productsService.setVariants(id, body),
     onSuccess: (_data, variables) => invalidate(variables.id),
   });
 }

@@ -1,7 +1,10 @@
 export interface CartItemDto {
   id: string;
   productId: string;
+  variantId: string;
   productName: string;
+  variantLabel: string | null;
+  sku: string | null;
   productSlug: string | null;
   imageUrl: string | null;
   quantity: number;
@@ -21,7 +24,8 @@ export interface CartDto {
 }
 
 export interface AddCartItemRequest {
-  productId: string;
+  productId?: string;
+  variantId?: string;
   quantity: number;
 }
 

@@ -39,10 +39,19 @@ export default function CheckoutSummary({
   const content = (
     <Space direction="vertical" size={8} style={{ width: "100%" }}>
       {cart.items.map((item) => (
-        <Flex key={item.id} justify="space-between">
-          <Text>
-            {item.productName} × {item.quantity}
-          </Text>
+        <Flex key={item.id} justify="space-between" align="start">
+          <div>
+            <Text>
+              {item.productName} × {item.quantity}
+            </Text>
+            {item.variantLabel && (
+              <div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Phân loại: {item.variantLabel}
+                </Text>
+              </div>
+            )}
+          </div>
           <Text>{formatVnd(item.subtotal)}</Text>
         </Flex>
       ))}

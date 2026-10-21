@@ -30,7 +30,7 @@ export default function FlashSaleRow() {
 
         <div className="flash-sale-row">
           {items.map((item) => (
-            <Link key={item.productId} href={`/products/id/${item.productId}`}>
+            <Link key={item.variantId} href={`/products/id/${item.productId}?variant=${item.variantId}`}>
               <Card
                 hoverable
                 styles={{ body: { padding: 12 } }}
@@ -66,6 +66,9 @@ export default function FlashSaleRow() {
                   }
                   description={
                     <>
+                      {item.variantLabel && (
+                        <div style={{ fontSize: 12, color: "var(--color-muted)" }}>Phân loại: {item.variantLabel}</div>
+                      )}
                       <Price value={item.flashPrice} oldValue={item.regularPrice} />
                       <div style={{ marginTop: 8 }}>
                         <Progress

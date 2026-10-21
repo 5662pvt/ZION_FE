@@ -53,9 +53,12 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
       title: "Sản phẩm",
       dataIndex: "productName",
       render: (name: string, record) => (
-        <Space size={6}>
-          <span>{name}</span>
-          {record.isGift && <StatusBadge color="var(--color-warning)">Quà tặng</StatusBadge>}
+        <Space direction="vertical" size={0}>
+          <Space size={6}>
+            <span>{name}</span>
+            {record.isGift && <StatusBadge color="var(--color-warning)">Quà tặng</StatusBadge>}
+          </Space>
+          {record.variantLabel && <Text type="secondary" style={{ fontSize: 12 }}>{record.variantLabel}</Text>}
         </Space>
       ),
     },
@@ -88,7 +91,7 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
       </Flex>
 
       <Table<OrderLineDto>
-        rowKey="productId"
+        rowKey="variantId"
         dataSource={order.lines}
         columns={lineColumns}
         pagination={false}

@@ -14,6 +14,13 @@ export interface CouponDto {
 
 export interface GiftItemDto {
   productId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface GiftItemInput {
+  productId?: string;
+  variantId?: string;
   quantity: number;
 }
 
@@ -66,7 +73,7 @@ export interface PromotionUpsertRequest {
   targetProductIds: string[];
   targetCategoryIds: string[];
   minQuantity: number | null;
-  giftItems: GiftItemDto[];
+  giftItems: GiftItemInput[];
 }
 
 export interface AddCouponRequest {

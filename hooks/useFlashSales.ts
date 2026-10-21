@@ -18,3 +18,11 @@ export function useActiveFlashSaleForProduct(productId: string) {
     .find((i) => i.productId === productId && i.available > 0);
   return { item, isLoading };
 }
+
+export function useActiveFlashSaleForVariant(variantId: string) {
+  const { data, isLoading } = useActiveFlashSales();
+  const item = (data ?? [])
+    .flatMap((flashSale) => flashSale.items.map((i) => ({ ...i, flashSaleEndsAt: flashSale.endsAt })))
+    .find((i) => i.variantId === variantId && i.available > 0);
+  return { item, isLoading };
+}
