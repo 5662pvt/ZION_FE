@@ -44,6 +44,9 @@ export interface WishlistItemDto {
   thumbnailUrl: string | null;
   inStock: boolean;
   addedAt: string;
+  minPrice: number;
+  maxPrice: number;
+  variantCount: number;
 }
 
 export interface WishlistToggleResponse {

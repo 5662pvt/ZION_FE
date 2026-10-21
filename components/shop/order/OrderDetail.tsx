@@ -169,7 +169,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
       )}
 
       <Table<OrderLineDto>
-        rowKey="variantId"
+        rowKey={(line) => `${line.variantId}-${line.isGift}`}
         dataSource={order.lines}
         columns={lineColumns}
         pagination={false}

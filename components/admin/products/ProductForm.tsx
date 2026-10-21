@@ -2,21 +2,24 @@
 
 import { useEffect, useMemo, useRef, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Form, Input, InputNumber, Select, TreeSelect, type FormProps } from "antd";
+import { Button, Form, Input, InputNumber, Select, TreeSelect, Typography, type FormProps } from "antd";
 import { mapCategoryTree } from "@/components/admin/products/categoryTreeData";
 import { useCategoryTree } from "@/hooks/useCategories";
 import { useCreateProduct, useUpdateProduct } from "@/hooks/useAdminProducts";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
 import { slugify } from "@/utils/slugify";
+import { formatVnd } from "@/utils/money";
 import type { ProductDto } from "@/types/products";
+
+const { Text } = Typography;
 
 interface ProductFormValues {
   name: string;
   slug?: string;
   sku?: string;
-  price: number;
-  currency: string;
+  price?: number;
+  currency?: string;
   categoryId?: string;
   brand?: string;
   description?: string;
@@ -47,6 +50,7 @@ export default function ProductForm({ mode, product }: ProductFormProps) {
   const slugTouchedRef = useRef(false);
 
   const treeData = useMemo(() => mapCategoryTree(categoryTree ?? []), [categoryTree]);
+  const hasVariants = mode === "edit" && !!product && product.options.length > 0;
 
   useEffect(() => {
     if (mode === "edit" && product) {
@@ -95,8 +99,8 @@ export default function ProductForm({ mode, product }: ProductFormProps) {
           name: values.name,
           slug: values.slug ?? slugify(values.name),
           sku: values.sku ?? "",
-          price: values.price,
-          currency: values.currency,
+          price: values.price as number,
+          currency: values.currency as string,
           categoryId: values.categoryId ?? null,
           description: values.description ?? null,
           brand: values.brand ?? null,
@@ -109,10 +113,9 @@ export default function ProductForm({ mode, product }: ProductFormProps) {
           body: {
             name: values.name,
             description: values.description ?? null,
-            price: values.price,
-            currency: values.currency,
             categoryId: values.categoryId ?? null,
             brand: values.brand ?? null,
+            ...(hasVariants ? {} : { price: values.price, currency: values.currency }),
           },
         });
         toast.success("Đã lưu thay đổi");
@@ -171,35 +174,44 @@ export default function ProductForm({ mode, product }: ProductFormProps) {
         )
       )}
 
-      <div style={{ display: "flex", gap: 16 }}>
-        <Form.Item
-          label="Giá"
-          name="price"
-          style={{ flex: 1 }}
-          rules={[{ required: true, message: "Vui lòng nhập giá" }]}
-        >
-          <InputNumber<number>
-            min={0}
-            step={1000}
-            style={{ width: "100%" }}
-            formatter={(value) => (value !== undefined && value !== null ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "")}
-            parser={(value) => (value ? Number(value.replace(/[^\d]/g, "")) : 0)}
-          />
+      {hasVariants && product ? (
+        <Form.Item label="Giá">
+          <Text>
+            Giá theo phân loại: {formatVnd(product.minPrice)}
+            {product.minPrice !== product.maxPrice ? ` – ${formatVnd(product.maxPrice)}` : ""}
+          </Text>
         </Form.Item>
-        <Form.Item
-          label="Đơn vị"
-          name="currency"
-          style={{ width: 140 }}
-          rules={[{ required: true, message: "Chọn đơn vị" }]}
-        >
-          <Select
-            options={[
-              { value: "VND", label: "VND" },
-              { value: "USD", label: "USD" },
-            ]}
-          />
-        </Form.Item>
-      </div>
+      ) : (
+        <div style={{ display: "flex", gap: 16 }}>
+          <Form.Item
+            label="Giá"
+            name="price"
+            style={{ flex: 1 }}
+            rules={[{ required: true, message: "Vui lòng nhập giá" }]}
+          >
+            <InputNumber<number>
+              min={0}
+              step={1000}
+              style={{ width: "100%" }}
+              formatter={(value) => (value !== undefined && value !== null ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "")}
+              parser={(value) => (value ? Number(value.replace(/[^\d]/g, "")) : 0)}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Đơn vị"
+            name="currency"
+            style={{ width: 140 }}
+            rules={[{ required: true, message: "Chọn đơn vị" }]}
+          >
+            <Select
+              options={[
+                { value: "VND", label: "VND" },
+                { value: "USD", label: "USD" },
+              ]}
+            />
+          </Form.Item>
+        </div>
+      )}
 
       <Form.Item label="Danh mục" name="categoryId">
         <TreeSelect allowClear placeholder="Chọn danh mục" treeData={treeData} />

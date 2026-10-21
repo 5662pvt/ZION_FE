@@ -91,7 +91,7 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
       </Flex>
 
       <Table<OrderLineDto>
-        rowKey="variantId"
+        rowKey={(line) => `${line.variantId}-${line.isGift}`}
         dataSource={order.lines}
         columns={lineColumns}
         pagination={false}

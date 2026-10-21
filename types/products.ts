@@ -111,8 +111,8 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
   name: string;
   description?: string | null;
-  price: number;
-  currency: string;
+  price?: number;
+  currency?: string;
   categoryId?: string | null;
   brand?: string | null;
 }

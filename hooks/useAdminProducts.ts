@@ -43,10 +43,15 @@ export function useUpdateProduct() {
 }
 
 export function useSetVariants() {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateAdminProducts();
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: SetVariantsRequest }) => productsService.setVariants(id, body),
-    onSuccess: (_data, variables) => invalidate(variables.id),
+    onSuccess: (_data, variables) => {
+      invalidate(variables.id);
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["products", "detail"] });
+    },
   });
 }
 

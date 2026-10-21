@@ -59,9 +59,14 @@ export default function ProductDetail({ product, onVariantImageChange }: Product
   useEffect(() => {
     if (!hasOptions) return;
     const sp = new URLSearchParams(searchParams.toString());
-    if (selectedVariant) sp.set("variant", selectedVariant.id);
+    const current = sp.get("variant");
+    const next = selectedVariant?.id ?? null;
+    if (current === next) return;
+    if (next) sp.set("variant", next);
     else sp.delete("variant");
-    router.replace(`${pathname}?${sp.toString()}`);
+    const qs = sp.toString();
+    const url = `${pathname}${qs ? `?${qs}` : ""}${window.location.hash}`;
+    window.history.replaceState(null, "", url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant?.id]);
 
@@ -83,12 +88,21 @@ export default function ProductDetail({ product, onVariantImageChange }: Product
   const available = availability?.available;
   const outOfStock = inStock === false;
 
-  function handleSelectOption(optionIndex: number, value: string) {
+  function handleSelectOption(optionIndex: number, value: string | null) {
     setSelected((prev) => {
       const next = [...prev];
       next[optionIndex] = value;
       return next;
     });
+  }
+
+  const availabilityKey = `${selectedVariant?.id ?? ""}|${available ?? ""}`;
+  const [prevAvailabilityKey, setPrevAvailabilityKey] = useState(availabilityKey);
+  if (prevAvailabilityKey !== availabilityKey) {
+    setPrevAvailabilityKey(availabilityKey);
+    if (available !== undefined) {
+      setQuantity((prev) => Math.min(prev, Math.max(available, 1)));
+    }
   }
 
   function cartPayload() {

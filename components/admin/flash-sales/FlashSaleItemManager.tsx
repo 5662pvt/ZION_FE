@@ -94,11 +94,13 @@ export default function FlashSaleItemManager({ flashSaleId, items }: FlashSaleIt
 
   useEffect(() => {
     if (!selectedProductId) return;
+    let cancelled = false;
     const timer = setTimeout(() => {
       setVariantsLoading(true);
       productsService
         .adminGetById(selectedProductId)
         .then((product) => {
+          if (cancelled) return;
           const activeVariants = product.variants.filter((v) => v.isActive);
           const options = activeVariants.map((v) => ({ value: v.id, label: variantLabel(v) }));
           setVariantOptions(options);
@@ -108,10 +110,17 @@ export default function FlashSaleItemManager({ flashSaleId, items }: FlashSaleIt
             form.setFieldValue("variantId", undefined);
           }
         })
-        .catch(() => setVariantOptions([]))
-        .finally(() => setVariantsLoading(false));
+        .catch(() => {
+          if (!cancelled) setVariantOptions([]);
+        })
+        .finally(() => {
+          if (!cancelled) setVariantsLoading(false);
+        });
     }, 0);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [selectedProductId, form]);
 
   function applyFieldErrors(err: ApiError): boolean {

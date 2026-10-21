@@ -46,6 +46,7 @@ export function useAdjustVariantStock() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["inventory", "list"] });
       queryClient.invalidateQueries({ queryKey: ["inventory", "variantMovements", variables.variantId] });
+      queryClient.invalidateQueries({ queryKey: ["inventory", "availability"] });
     },
   });
 }

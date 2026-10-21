@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { HubConnectionBuilder, HubConnectionState, type HubConnection } from "@microsoft/signalr";
+import { HubConnectionBuilder, HubConnectionState, LogLevel, type HubConnection } from "@microsoft/signalr";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { getAccessToken, onAuthCleared } from "@/utils/authStorage";
@@ -27,6 +27,7 @@ export function useNotificationSocket() {
         withCredentials: false,
       })
       .withAutomaticReconnect()
+      .configureLogging(LogLevel.Warning)
       .build();
 
     connection.on("notificationReceived", (payload: UserNotificationDto) => {

@@ -42,8 +42,12 @@ function suggestSku(baseSku: string, option1Value: string | null, option2Value: 
   return parts.join("-");
 }
 
+function activeOptionGroups(groups: OptionGroupState[]): OptionGroupState[] {
+  return groups.filter((g) => g.name.trim() && g.values.length > 0);
+}
+
 function buildCombos(groups: OptionGroupState[]): Array<{ option1Value: string | null; option2Value: string | null }> {
-  const activeGroups = groups.filter((g) => g.values.length > 0);
+  const activeGroups = activeOptionGroups(groups);
   const [g1, g2] = activeGroups;
   if (!g1) return [{ option1Value: null, option2Value: null }];
   if (!g2) return g1.values.map((v) => ({ option1Value: v, option2Value: null }));
@@ -80,7 +84,7 @@ function regenerateRows(
         sku: original.sku,
         price: original.price,
         currency: original.currency,
-        isActive: original.isActive,
+        isActive: true,
         imageId: original.imageId,
       };
     }
@@ -142,12 +146,27 @@ export default function VariantEditor({ product }: VariantEditorProps) {
   }
 
   function updateGroupValues(index: number, values: string[]) {
-    const deduped = Array.from(new Set(values.map((v) => v.trim()).filter(Boolean)));
+    const seen = new Set<string>();
+    const deduped: string[] = [];
+    values.forEach((raw) => {
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+      const lower = trimmed.toLowerCase();
+      if (seen.has(lower)) return;
+      seen.add(lower);
+      deduped.push(trimmed);
+    });
     setOptionGroups((prev) => prev.map((g, i) => (i === index ? { ...g, values: deduped } : g)));
   }
 
   function updateRow(key: string, patch: Partial<VariantRow>) {
     setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+    setRowErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
   function applyBulkPrice() {
@@ -194,11 +213,15 @@ export default function VariantEditor({ product }: VariantEditorProps) {
       toast.error("Vui lòng nhập giá hợp lệ cho tất cả phân loại");
       return;
     }
+    if (optionGroups.some((g) => g.values.length > 0 && !g.name.trim())) {
+      toast.error("Vui lòng nhập tên cho nhóm phân loại có giá trị");
+      return;
+    }
 
     setRowErrors({});
     setRows(trimmedRows);
 
-    const activeGroups = optionGroups.filter((g) => g.name.trim() && g.values.length > 0);
+    const activeGroups = activeOptionGroups(optionGroups);
     const body: SetVariantsRequest = {
       options: activeGroups.map((g) => ({ name: g.name.trim(), values: g.values })),
       variants: trimmedRows.map((r) => ({
@@ -214,7 +237,8 @@ export default function VariantEditor({ product }: VariantEditorProps) {
     };
 
     try {
-      await setVariantsMutation.mutateAsync({ id: product.id, body });
+      const updated = await setVariantsMutation.mutateAsync({ id: product.id, body });
+      setRows(regenerateRows(optionGroups, [], updated));
       toast.success("Đã lưu phân loại hàng");
     } catch (err) {
       if (err instanceof ApiError && applyFieldErrors(err, trimmedRows)) return;

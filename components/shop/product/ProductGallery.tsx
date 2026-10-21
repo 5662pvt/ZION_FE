@@ -23,6 +23,7 @@ export default function ProductGallery({ images, name, activeOverrideUrl }: Prod
 
   const overrideUrl = manualUrl ? null : normalizedOverrideUrl;
   const active = overrideUrl ? { id: "variant-image", url: overrideUrl, alt: name, displayOrder: -1 } : images[activeIndex];
+  const overrideImageIndex = overrideUrl ? images.findIndex((img) => img.url === overrideUrl) : -1;
 
   function handleSelectThumbnail(index: number) {
     setActiveIndex(index);
@@ -58,14 +59,17 @@ export default function ProductGallery({ images, name, activeOverrideUrl }: Prod
               key={image.id}
               type="button"
               aria-label={`Xem ảnh ${index + 1} của ${name}`}
-              aria-pressed={!overrideUrl && index === activeIndex}
+              aria-pressed={overrideUrl ? index === overrideImageIndex : index === activeIndex}
               onClick={() => handleSelectThumbnail(index)}
               style={{
                 cursor: "pointer",
                 padding: 0,
                 lineHeight: 0,
                 background: "none",
-                border: !overrideUrl && index === activeIndex ? "2px solid var(--color-action)" : "2px solid transparent",
+                border:
+                  (overrideUrl ? index === overrideImageIndex : index === activeIndex)
+                    ? "2px solid var(--color-action)"
+                    : "2px solid transparent",
                 borderRadius: 4,
               }}
             >
