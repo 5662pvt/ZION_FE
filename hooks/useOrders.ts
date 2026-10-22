@@ -88,6 +88,7 @@ export function usePlaceOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: ["orders", "mine"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.loyalty.me });
       // BE xoá giỏ hàng bất đồng bộ sau OrderCreated - invalidate lại sau khoảng trễ
       // để badge giỏ hàng không bị kẹt số cũ khi lần invalidate đầu còn trước lúc BE xử lý.
       setTimeout(() => {
@@ -104,6 +105,7 @@ export function useCancelOrder() {
     onSuccess: (order: OrderDto) => {
       queryClient.setQueryData(queryKeys.orders.detail(order.id), order);
       queryClient.invalidateQueries({ queryKey: ["orders", "mine"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.loyalty.me });
     },
   });
 }

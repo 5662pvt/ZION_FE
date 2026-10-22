@@ -16,6 +16,8 @@ function useInvalidateReturns() {
     queryClient.invalidateQueries({ queryKey: ["returns", "admin", "list"] });
     if (orderId) queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(orderId) });
     if (returnId) queryClient.invalidateQueries({ queryKey: queryKeys.returns.adminDetail(returnId) });
+    // Xu được BE hoàn lại bất đồng bộ khi xử lý return/refund - invalidate là đủ, không cần polling.
+    queryClient.invalidateQueries({ queryKey: queryKeys.loyalty.me });
   };
 }
 
