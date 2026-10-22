@@ -143,7 +143,7 @@ export default function ProductDetail({ product, onVariantImageChange }: Product
   const isAdding = addToCart.isPending && intent === "add";
   const isBuyingNow = addToCart.isPending && intent === "buyNow";
 
-  const skuToShow = hasOptions ? selectedVariant?.sku ?? product.sku : product.sku;
+  const skuToShow = hasOptions ? selectedVariant?.sku ?? null : product.sku;
 
   function handleChatNow() {
     openChatWidget({
@@ -165,7 +165,7 @@ export default function ProductDetail({ product, onVariantImageChange }: Product
       <Title level={1} style={{ fontSize: 24, marginBottom: 4 }}>
         {product.name}
       </Title>
-      <Text type="secondary">Mã SP: {skuToShow}</Text>
+      <Text type="secondary">Mã SP: {skuToShow ?? "—"}</Text>
       {product.brand && (
         <div>
           <Text type="secondary">Thương hiệu: {product.brand}</Text>

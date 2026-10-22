@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Radio, Space, Tooltip, Typography } from "antd";
 import type { ProductOptionDto, ProductVariantDto } from "@/types/products";
 import type { AvailabilityDto } from "@/types/inventory";
@@ -39,6 +39,17 @@ export default function VariantSelector({ options, variants, availability, selec
 
   const activeVariants = variants.filter((v) => v.isActive);
 
+  // A tier1+tier2 combo is usable only if an active variant exists for it and, when
+  // availability is known, that variant still has stock.
+  function comboInStock(tier1Value: string, tier2Value: string): boolean {
+    const variant = variants.find(
+      (v) => v.isActive && v.option1Value === tier1Value && v.option2Value === tier2Value,
+    );
+    if (!variant) return false;
+    if (!availability) return true;
+    return (availability[variant.id]?.available ?? 0) > 0;
+  }
+
   // Auto-select an option that only has one value, and auto-select the sole active variant.
   useEffect(() => {
     options.forEach((option, index) => {
@@ -54,18 +65,26 @@ export default function VariantSelector({ options, variants, availability, selec
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, variants]);
 
-  // Clear tier 2 when the tier 1 choice makes the current tier 2 value invalid.
+  // Clear the invalid side when the current tier1+tier2 combo is out of stock. Tracks the
+  // previous selection to tell which side just changed: if tier 2 changed alone, tier 1 is the
+  // stale side to clear; otherwise (tier 1 changed, availability/variants changed, or initial
+  // mount) tier 2 is cleared. Never clears both in the same pass.
+  const prevSelectedRef = useRef<[string | null, string | null]>([null, null]);
   useEffect(() => {
     if (options.length < 2) return;
     const tier1 = selected[0];
     const tier2 = selected[1];
+    const [prevTier1, prevTier2] = prevSelectedRef.current;
+    prevSelectedRef.current = [tier1, tier2];
     if (!tier1 || !tier2) return;
-    const stillValid = variants.some(
-      (v) => v.isActive && v.option1Value === tier1 && v.option2Value === tier2,
-    );
-    if (!stillValid) onChange(1, null);
+    if (comboInStock(tier1, tier2)) return;
+    if (tier2 !== prevTier2 && tier1 === prevTier1) {
+      onChange(0, null);
+    } else {
+      onChange(1, null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected[0]]);
+  }, [selected[0], selected[1], availability, variants]);
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>

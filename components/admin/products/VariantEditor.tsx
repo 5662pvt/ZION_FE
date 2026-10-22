@@ -6,7 +6,7 @@ import { useSetVariants } from "@/hooks/useAdminProducts";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
 import { slugify } from "@/utils/slugify";
-import type { ProductDto, SetVariantsRequest } from "@/types/products";
+import type { ProductDto, ProductVariantDto, SetVariantsRequest } from "@/types/products";
 
 const { Text } = Typography;
 
@@ -42,6 +42,27 @@ function suggestSku(baseSku: string, option1Value: string | null, option2Value: 
   return parts.join("-");
 }
 
+// Existing variant SKUs usually share a common prefix (e.g. "UI-SHIRT" in "UI-SHIRT-DO-S");
+// product.sku is only the default variant's SKU, so it's not a reliable base once variants exist.
+function commonSkuPrefix(variants: ProductVariantDto[]): string {
+  if (variants.length < 2) return "";
+  const segmentsList = variants.map((v) => v.sku.split("-"));
+  const [first, ...rest] = segmentsList;
+  let length = 0;
+  for (let i = 0; i < first.length; i++) {
+    if (rest.every((segments) => segments[i] === first[i])) {
+      length = i + 1;
+    } else {
+      break;
+    }
+  }
+  return first.slice(0, length).join("-");
+}
+
+function baseSkuFor(variants: ProductVariantDto[], fallbackSku: string): string {
+  return commonSkuPrefix(variants) || fallbackSku;
+}
+
 function activeOptionGroups(groups: OptionGroupState[]): OptionGroupState[] {
   return groups.filter((g) => g.name.trim() && g.values.length > 0);
 }
@@ -68,6 +89,7 @@ function regenerateRows(
   const combos = buildCombos(groups);
   const prevByKey = new Map(prevRows.map((r) => [r.key, r]));
   const originalByKey = new Map(product.variants.map((v) => [comboKey(v.option1Value, v.option2Value), v]));
+  const baseSku = baseSkuFor(product.variants, product.sku);
 
   return combos.map((combo) => {
     const key = comboKey(combo.option1Value, combo.option2Value);
@@ -94,7 +116,7 @@ function regenerateRows(
       id: undefined,
       option1Value: combo.option1Value,
       option2Value: combo.option2Value,
-      sku: suggestSku(product.sku, combo.option1Value, combo.option2Value),
+      sku: suggestSku(baseSku, combo.option1Value, combo.option2Value),
       price: product.price,
       currency: product.currency,
       isActive: true,

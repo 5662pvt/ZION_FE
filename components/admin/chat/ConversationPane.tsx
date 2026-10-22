@@ -44,26 +44,33 @@ export default function ConversationPane({ conversationId, onBack }: Conversatio
   const [productPickerOpen, setProductPickerOpen] = useState(false);
 
   const messages = flattenChatMessages(messagesQuery.data?.pages);
-  const lastMessageId = messages[messages.length - 1]?.id;
-  const lastMarkedMessageIdRef = useRef<string | undefined>(undefined);
+  const unread = conversation?.staffUnread ?? 0;
+
+  // Mark read once per open and once per incoming message while visible; `unread` (not
+  // message ids) is the signal because the message list loads async and would otherwise
+  // look like a second "new message" right after the open-triggered read.
+  const lastMarkedUnreadRef = useRef<number | null>(null);
 
   useEffect(() => {
-    lastMarkedMessageIdRef.current = undefined;
+    lastMarkedUnreadRef.current = null;
   }, [conversationId]);
 
   useEffect(() => {
     function tryMarkRead() {
+      if (unread <= 0) {
+        lastMarkedUnreadRef.current = null;
+        return;
+      }
       if (document.visibilityState !== "visible") return;
-      if (lastMessageId === undefined) return;
-      if (lastMessageId === lastMarkedMessageIdRef.current) return;
+      if (unread === lastMarkedUnreadRef.current) return;
+      lastMarkedUnreadRef.current = unread;
       markRead.mutate();
-      lastMarkedMessageIdRef.current = lastMessageId;
     }
     tryMarkRead();
     document.addEventListener("visibilitychange", tryMarkRead);
     return () => document.removeEventListener("visibilitychange", tryMarkRead);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId, lastMessageId]);
+  }, [conversationId, unread]);
 
   function handleSendText(text: string) {
     sendMessage.mutate(

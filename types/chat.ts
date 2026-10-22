@@ -34,7 +34,6 @@ export interface ChatMessageDto {
   product: ChatProductCardDto | null;
   order: ChatOrderCardDto | null;
   createdAt: string;
-  staffEmail?: string | null;
 }
 
 export interface ConversationDto {

@@ -43,25 +43,27 @@ export default function ChatWidget() {
 
   const messages = flattenChatMessages(messagesQuery.data?.pages);
   const unread = conversation?.customerUnread ?? 0;
-  const lastMessageId = messages[messages.length - 1]?.id;
 
-  const wasOpenRef = useRef(false);
-  const lastMarkedMessageIdRef = useRef<string | undefined>(undefined);
+  // Mark read once per open and once per incoming message while the widget stays open;
+  // `unread` (not message ids) is the signal because the message list loads async and
+  // would otherwise look like a second "new message" right after the open-triggered read.
+  const lastMarkedUnreadRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isOpen || !isAuthenticated) {
-      wasOpenRef.current = false;
+      lastMarkedUnreadRef.current = null;
       return;
     }
-    const justOpened = !wasOpenRef.current;
-    const hasNewMessage = lastMessageId !== undefined && lastMessageId !== lastMarkedMessageIdRef.current;
-    if (justOpened || hasNewMessage) {
-      markRead.mutate();
-      lastMarkedMessageIdRef.current = lastMessageId;
+    if (unread <= 0) {
+      lastMarkedUnreadRef.current = null;
+      return;
     }
-    wasOpenRef.current = true;
+    if (unread !== lastMarkedUnreadRef.current) {
+      lastMarkedUnreadRef.current = unread;
+      markRead.mutate();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, isAuthenticated, lastMessageId]);
+  }, [isOpen, isAuthenticated, unread]);
 
   function handleSendText(text: string) {
     sendMessage.mutate(
