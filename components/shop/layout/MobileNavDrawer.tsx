@@ -47,6 +47,14 @@ export default function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps)
             </Link>
           ),
         },
+        {
+          key: "xu",
+          label: (
+            <Link href="/account/xu" onClick={onClose}>
+              Xu của tôi
+            </Link>
+          ),
+        },
         ...(hasRole(ROLES.Admin, ROLES.Staff)
           ? [
               {

@@ -33,6 +33,7 @@ export default function ShopHeader() {
     ? [
         { key: "account", label: <Link href="/account">Tài khoản</Link> },
         { key: "orders", label: <Link href="/account/orders">Đơn hàng</Link> },
+        { key: "xu", label: <Link href="/account/xu">Xu của tôi</Link> },
         ...(hasRole(ROLES.Admin, ROLES.Staff) ? [{ key: "admin", label: <Link href="/admin">Quản trị</Link> }] : []),
         { type: "divider" as const },
         { key: "logout", label: "Đăng xuất", icon: <FiLogOut />, onClick: () => void logout() },

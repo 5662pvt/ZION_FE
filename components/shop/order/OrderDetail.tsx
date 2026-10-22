@@ -209,6 +209,12 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
             <Text>Phí vận chuyển</Text>
             <Text>{order.shippingFee === 0 ? "Miễn phí" : formatVnd(order.shippingFee)}</Text>
           </Flex>
+          {order.pointsUsed > 0 && (
+            <Flex justify="space-between">
+              <Text>Xu đã dùng (−{order.pointsUsed} Xu)</Text>
+              <Text type="success">−{formatVnd(order.pointsDiscount)}</Text>
+            </Flex>
+          )}
           <Flex justify="space-between" style={{ marginTop: 8 }}>
             <Text strong>Tổng cộng</Text>
             <Text strong>{formatVnd(order.total)}</Text>

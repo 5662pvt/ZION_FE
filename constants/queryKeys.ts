@@ -14,6 +14,7 @@ import type { AuditLogListParams } from "@/types/auditLogs";
 import type { WishlistParams } from "@/types/users";
 import type { MyNotificationsParams, NotificationFeedParams } from "@/types/notifications";
 import type { AdminRefundListParams, AdminReturnListParams } from "@/types/returns";
+import type { LoyaltyTransactionsParams } from "@/types/loyalty";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -119,5 +120,14 @@ export const queryKeys = {
   },
   auditLogs: {
     list: (filters: AuditLogListParams) => ["audit-logs", "list", filters] as const,
+  },
+  loyalty: {
+    me: ["loyalty", "me"] as const,
+    myTransactions: (params: LoyaltyTransactionsParams) => ["loyalty", "me", "transactions", params] as const,
+  },
+  adminLoyalty: {
+    detail: (userId: string) => ["loyalty", "admin", "detail", userId] as const,
+    transactions: (userId: string, params: LoyaltyTransactionsParams) =>
+      ["loyalty", "admin", "transactions", userId, params] as const,
   },
 };

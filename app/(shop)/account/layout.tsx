@@ -10,6 +10,7 @@ const MENU_ITEMS = [
   { key: "/account/addresses", label: "Sổ địa chỉ" },
   { key: "/account/orders", label: "Đơn hàng" },
   { key: "/account/wishlist", label: "Yêu thích" },
+  { key: "/account/xu", label: "Xu của tôi" },
   { key: "/account/notifications", label: "Thông báo" },
   { key: "/account/reviews", label: "Đánh giá của tôi" },
   { key: "/account/security", label: "Bảo mật" },

@@ -11,6 +11,7 @@ import { useMarkAllNotificationsRead } from "@/hooks/useMarkAllNotificationsRead
 import EmptyState from "@/components/ui/EmptyState";
 import ErrorState from "@/components/ui/ErrorState";
 import PageHeader from "@/components/ui/PageHeader";
+import XuCoinIcon from "@/components/common/XuCoinIcon";
 import { ApiError } from "@/services/apiClient";
 import type { UserNotificationDto, UserNotificationType } from "@/types/notifications";
 
@@ -30,6 +31,8 @@ const TYPE_META: Record<UserNotificationType, { label: string; icon: ReactNode; 
   ReturnRejected: { label: "Yêu cầu trả hàng bị từ chối", icon: <FiXCircle aria-hidden />, color: "var(--color-danger)" },
   ReturnShippedBack: { label: "Đã gửi hàng trả lại", icon: <FiTruck aria-hidden />, color: "var(--color-primary)" },
   ReturnRefunded: { label: "Đã hoàn tiền", icon: <FiDollarSign aria-hidden />, color: "var(--color-success)" },
+  PointsEarned: { label: "Nhận Xu", icon: <XuCoinIcon size={20} />, color: "var(--color-warning)" },
+  PointsReturned: { label: "Hoàn Xu", icon: <XuCoinIcon size={20} />, color: "var(--color-warning)" },
 };
 
 export default function UserNotificationList() {
@@ -64,6 +67,14 @@ export default function UserNotificationList() {
     if (!item.isRead) markRead.mutate(item.id);
     if (item.orderId) router.push(`/orders/${item.orderId}`);
   }
+
+  function handleViewXu(item: UserNotificationDto, event: MouseEvent) {
+    event.stopPropagation();
+    if (!item.isRead) markRead.mutate(item.id);
+    router.push("/account/xu");
+  }
+
+  const XU_TYPES = new Set<UserNotificationType>(["PointsEarned", "PointsReturned"]);
 
   if (isError) {
     return (
@@ -141,10 +152,16 @@ export default function UserNotificationList() {
                       </Text>
                     </Flex>
                   </Flex>
-                  {item.orderId && (
+                  {item.orderId ? (
                     <Button size="small" onClick={(event) => handleViewOrder(item, event)}>
                       Xem đơn hàng
                     </Button>
+                  ) : (
+                    XU_TYPES.has(item.type) && (
+                      <Button size="small" onClick={(event) => handleViewXu(item, event)}>
+                        Xem Xu của tôi
+                      </Button>
+                    )
                   )}
                 </Flex>
               </List.Item>

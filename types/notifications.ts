@@ -28,7 +28,9 @@ export type UserNotificationType =
   | "ReturnApproved"
   | "ReturnRejected"
   | "ReturnShippedBack"
-  | "ReturnRefunded";
+  | "ReturnRefunded"
+  | "PointsEarned"
+  | "PointsReturned";
 
 export interface UserNotificationDto {
   id: string;

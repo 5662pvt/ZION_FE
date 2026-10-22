@@ -51,6 +51,8 @@ export interface OrderDto {
   couponCode: string | null;
   discountAmount: number;
   discountTarget: DiscountTarget;
+  pointsUsed: number;
+  pointsDiscount: number;
   shippingAddress: ShippingAddressDto;
   lines: OrderLineDto[];
   history: OrderHistoryEntry[];
@@ -72,6 +74,7 @@ export interface PlaceOrderRequest {
   paymentMethod: PaymentMethod;
   note?: string;
   couponCode?: string;
+  usePoints?: boolean;
 }
 
 export interface CancelOrderRequest {

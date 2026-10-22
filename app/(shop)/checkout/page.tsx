@@ -18,6 +18,7 @@ import { useCart, useInvalidateCart } from "@/hooks/useCart";
 import { useAddresses } from "@/hooks/useAddresses";
 import { useOrder, useOrderPolling, usePlaceOrder } from "@/hooks/useOrders";
 import { useCreatePaymentIntent } from "@/hooks/usePayments";
+import { useMyLoyalty } from "@/hooks/useLoyalty";
 import { queryKeys } from "@/constants/queryKeys";
 import { ApiError } from "@/services/apiClient";
 import { toast } from "@/utils/toast";
@@ -31,6 +32,7 @@ function buildIdempotencyFingerprint(body: PlaceOrderRequest): string {
     body.paymentMethod.toLowerCase(),
     (body.note ?? "").trim(),
     (body.couponCode ?? "").trim().toUpperCase(),
+    body.usePoints ? "points" : "no-points",
   ].join("|");
 }
 
@@ -67,6 +69,7 @@ function CheckoutContent() {
   const isDesktop = useIsDesktopViewport();
   const { data: cart, isCartLoading, isError: isCartError } = useCart();
   const { data: addresses, isLoading: isAddressesLoading, isError: isAddressesError } = useAddresses();
+  const { data: loyalty } = useMyLoyalty();
   const placeOrder = usePlaceOrder();
   const createPaymentIntent = useCreatePaymentIntent();
   const invalidateCart = useInvalidateCart();
@@ -77,6 +80,7 @@ function CheckoutContent() {
   const [paymentOption, setPaymentOption] = useState<CheckoutPaymentOption>("COD");
   const [note, setNote] = useState("");
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const [usePoints, setUsePoints] = useState(false);
   const [stockError, setStockError] = useState<string | null>(null);
   const [cancelInfo, setCancelInfo] = useState<{ orderId: string; reason: string | null } | null>(null);
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
@@ -249,6 +253,7 @@ function CheckoutContent() {
       paymentMethod,
       note: note.trim() ? note.trim() : undefined,
       couponCode: coupon?.code,
+      usePoints: usePoints || undefined,
     };
 
     const fingerprint = buildIdempotencyFingerprint(body);
@@ -308,6 +313,7 @@ function CheckoutContent() {
 
       toast.error(err.message);
       if (code === "Orders.InvalidCoupon" || code?.startsWith("Promotions.")) setCoupon(null);
+      if (code === "Orders.PointsUnavailable") setUsePoints(false);
     }
   };
 
@@ -331,6 +337,9 @@ function CheckoutContent() {
       onSubmit={current === 2 ? handleSubmit : undefined}
       submitting={submitting}
       disabled={!addressId}
+      loyalty={loyalty}
+      usePoints={usePoints}
+      onToggleUsePoints={setUsePoints}
     />
   );
 
