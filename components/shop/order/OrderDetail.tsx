@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import dayjs from "dayjs";
 import { Alert, Button, Flex, Result, Skeleton, Space, Spin, Table, Typography, type TableProps } from "antd";
+import { FiMessageCircle } from "react-icons/fi";
 import Breadcrumbs from "@/components/shop/layout/Breadcrumbs";
 import OrderStatusSteps from "./OrderStatusSteps";
 import OrderActions from "./OrderActions";
 import ReturnSection from "./ReturnSection";
 import { useOrder, useOrderPolling } from "@/hooks/useOrders";
+import { openChatWidget } from "@/hooks/useChatWidgetStore";
 import { ApiError } from "@/services/apiClient";
 import { paymentMethodLabel } from "@/utils/orderStatus";
 import { formatVnd } from "@/utils/money";
@@ -72,6 +74,23 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
         />
       </div>
     );
+  }
+
+  const confirmedOrder = order;
+
+  function handleChatWithShop() {
+    openChatWidget({
+      type: "Order",
+      card: {
+        id: confirmedOrder.id,
+        code: confirmedOrder.code,
+        status: confirmedOrder.status,
+        total: confirmedOrder.total,
+        currency: confirmedOrder.currency,
+        firstItemName: confirmedOrder.lines[0]?.productName ?? "",
+        itemCount: confirmedOrder.lines.length,
+      },
+    });
   }
 
   const lineColumns: TableProps<OrderLineDto>["columns"] = [
@@ -147,6 +166,9 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
         <Space direction="vertical" align="end">
           <OrderStatusBadge status={order.status} />
           <Text type="secondary">{paymentMethodLabel(order.paymentMethod)}</Text>
+          <Button icon={<FiMessageCircle aria-hidden />} onClick={handleChatWithShop}>
+            Chat với shop
+          </Button>
         </Space>
       </Flex>
 

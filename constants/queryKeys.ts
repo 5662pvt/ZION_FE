@@ -15,6 +15,7 @@ import type { WishlistParams } from "@/types/users";
 import type { MyNotificationsParams, NotificationFeedParams } from "@/types/notifications";
 import type { AdminRefundListParams, AdminReturnListParams } from "@/types/returns";
 import type { LoyaltyTransactionsParams } from "@/types/loyalty";
+import type { AdminChatConversationsParams } from "@/types/chat";
 
 export const queryKeys = {
   me: ["me"] as const,
@@ -129,5 +130,15 @@ export const queryKeys = {
     detail: (userId: string) => ["loyalty", "admin", "detail", userId] as const,
     transactions: (userId: string, params: LoyaltyTransactionsParams) =>
       ["loyalty", "admin", "transactions", userId, params] as const,
+  },
+  chat: {
+    conversation: () => ["chat", "conversation"] as const,
+    messages: () => ["chat", "messages"] as const,
+  },
+  adminChat: {
+    conversations: (filters: AdminChatConversationsParams) => ["adminChat", "conversations", filters] as const,
+    conversation: (id: string) => ["adminChat", "conversation", id] as const,
+    messages: (id: string) => ["adminChat", "messages", id] as const,
+    unreadCount: () => ["adminChat", "unreadCount"] as const,
   },
 };

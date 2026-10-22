@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Space, Typography } from "antd";
-import { FiRefreshCw, FiTruck } from "react-icons/fi";
+import { Button, Space, Typography } from "antd";
+import { FiMessageCircle, FiRefreshCw, FiTruck } from "react-icons/fi";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import StickyBuyBar from "@/components/shop/product/StickyBuyBar";
 import VariantSelector from "@/components/shop/product/VariantSelector";
 import ProductTabs from "@/components/shop/product/ProductTabs";
 import WishlistButton from "@/components/shop/product/WishlistButton";
+import { openChatWidget } from "@/hooks/useChatWidgetStore";
 import { useAddToCart } from "@/hooks/useCart";
 import { useProductAvailability, useVariantAvailability } from "@/hooks/useAvailability";
 import { useActiveFlashSaleForProduct, useActiveFlashSaleForVariant } from "@/hooks/useFlashSales";
@@ -144,6 +145,21 @@ export default function ProductDetail({ product, onVariantImageChange }: Product
 
   const skuToShow = hasOptions ? selectedVariant?.sku ?? product.sku : product.sku;
 
+  function handleChatNow() {
+    openChatWidget({
+      type: "Product",
+      card: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        minPrice: product.minPrice,
+        maxPrice: product.maxPrice,
+        currency: product.currency,
+        imageUrl: product.images[0]?.url ?? null,
+      },
+    });
+  }
+
   return (
     <div>
       <Title level={1} style={{ fontSize: 24, marginBottom: 4 }}>
@@ -216,6 +232,9 @@ export default function ProductDetail({ product, onVariantImageChange }: Product
             onBuyNow={handleBuyNow}
           />
           <WishlistButton productId={product.id} size="large" />
+          <Button size="large" icon={<FiMessageCircle aria-hidden />} onClick={handleChatNow}>
+            Chat ngay
+          </Button>
         </Space>
       </div>
 
