@@ -17,6 +17,7 @@ const SECTION_LABELS: Record<string, string> = {
   customers: "Khách hàng",
   payments: "Thanh toán",
   "audit-logs": "Nhật ký thao tác",
+  chat: "Chat",
 };
 
 const SYSTEM_LABELS: Record<string, string> = {

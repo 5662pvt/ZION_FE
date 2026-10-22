@@ -104,6 +104,14 @@
   }
 }
 
+.navLinkWithBadge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+}
+
 .content {
   background: var(--color-page);
   padding: var(--space-4);

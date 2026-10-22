@@ -70,6 +70,7 @@ export interface SendChatMessageBody {
 
 export interface ChatMessagesParams {
   before?: string;
+  beforeId?: string;
   limit?: number;
 }
 

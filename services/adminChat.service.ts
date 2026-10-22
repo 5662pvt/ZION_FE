@@ -23,6 +23,7 @@ function buildConversationsQuery(params: AdminChatConversationsParams): string {
 function buildMessagesQuery(params: ChatMessagesParams): string {
   const search = new URLSearchParams();
   if (params.before) search.set("before", params.before);
+  if (params.beforeId) search.set("beforeId", params.beforeId);
   if (params.limit) search.set("limit", String(params.limit));
   const qs = search.toString();
   return qs ? `?${qs}` : "";

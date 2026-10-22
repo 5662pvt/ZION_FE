@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Breadcrumb, Button, Drawer, Dropdown, Layout, Menu, type MenuProps } from "antd";
+import { Badge, Breadcrumb, Button, Drawer, Dropdown, Layout, Menu, type MenuProps } from "antd";
 import {
   FiActivity,
   FiAlertTriangle,
@@ -18,6 +18,7 @@ import {
   FiLayers,
   FiLogOut,
   FiMenu,
+  FiMessageCircle,
   FiPercent,
   FiRotateCcw,
   FiShoppingCart,
@@ -30,6 +31,8 @@ import {
 import AdminGuard from "@/components/admin/AdminGuard";
 import NotificationBell from "@/components/shop/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminChatUnreadCount } from "@/hooks/useAdminChat";
+import { ChatSocketProvider, useChatSocket } from "@/hooks/useChatSocket";
 import { ROLES } from "@/constants/roles";
 import { resolveBreadcrumb } from "@/components/admin/common/breadcrumb";
 import styles from "./admin.module.css";
@@ -77,6 +80,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Bán hàng",
     items: [
       { key: "orders", href: "/admin/orders", icon: <FiShoppingCart />, label: "Đơn hàng" },
+      { key: "chat", href: "/admin/chat", icon: <FiMessageCircle />, label: "Chat" },
       { key: "returns", href: "/admin/returns", icon: <FiRotateCcw />, label: "Trả hàng" },
       { key: "promotions", href: "/admin/promotions", icon: <FiPercent />, label: "Khuyến mãi" },
       { key: "flash-sales", href: "/admin/flash-sales", icon: <FiZap />, label: "Flash Sale" },
@@ -103,7 +107,7 @@ function resolveSelectedKey(pathname: string, entries: NavEntry[]): string {
   return match?.key ?? "dashboard";
 }
 
-function buildMenuItems(groups: NavGroup[], isAdmin: boolean): MenuProps["items"] {
+function buildMenuItems(groups: NavGroup[], isAdmin: boolean, chatUnreadCount: number): MenuProps["items"] {
   return groups
     .map((group) => ({
       key: group.key,
@@ -114,7 +118,15 @@ function buildMenuItems(groups: NavGroup[], isAdmin: boolean): MenuProps["items"
         .map((entry) => ({
           key: entry.key,
           icon: entry.icon,
-          label: <Link href={entry.href}>{entry.label}</Link>,
+          label:
+            entry.key === "chat" && chatUnreadCount > 0 ? (
+              <Link href={entry.href} className={styles.navLinkWithBadge}>
+                <span>{entry.label}</span>
+                <Badge count={chatUnreadCount} size="small" overflowCount={99} />
+              </Link>
+            ) : (
+              <Link href={entry.href}>{entry.label}</Link>
+            ),
         })),
     }))
     .filter((group) => group.children.length > 0);
@@ -127,9 +139,27 @@ function AdminShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { data: chatUnread, refetch: refetchChatUnread } = useAdminChatUnreadCount();
+  const { on } = useChatSocket();
+  const chatUnreadCount = chatUnread?.conversations ?? 0;
+
+  useEffect(() => {
+    const offMessage = on("chat:message", () => void refetchChatUnread());
+    const offRead = on("chat:read", () => void refetchChatUnread());
+    return () => {
+      offMessage();
+      offRead();
+    };
+  }, [on, refetchChatUnread]);
+
+  useEffect(() => {
+    const interval = setInterval(() => void refetchChatUnread(), 60_000);
+    return () => clearInterval(interval);
+  }, [refetchChatUnread]);
+
   const allEntries = useMemo(() => NAV_GROUPS.flatMap((group) => group.items), []);
   const selectedKey = useMemo(() => resolveSelectedKey(pathname, allEntries), [pathname, allEntries]);
-  const menuItems = useMemo(() => buildMenuItems(NAV_GROUPS, isAdmin), [isAdmin]);
+  const menuItems = useMemo(() => buildMenuItems(NAV_GROUPS, isAdmin, chatUnreadCount), [isAdmin, chatUnreadCount]);
   const breadcrumbEntries = useMemo(() => resolveBreadcrumb(pathname), [pathname]);
   const breadcrumbItems = useMemo(
     () =>
@@ -204,8 +234,10 @@ function AdminShell({ children }: { children: ReactNode }) {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <AdminGuard>
-      <AdminShell>{children}</AdminShell>
-    </AdminGuard>
+    <ChatSocketProvider>
+      <AdminGuard>
+        <AdminShell>{children}</AdminShell>
+      </AdminGuard>
+    </ChatSocketProvider>
   );
 }

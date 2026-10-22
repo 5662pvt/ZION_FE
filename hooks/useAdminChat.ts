@@ -17,10 +17,16 @@ import type {
 
 const MESSAGES_PAGE_SIZE = 30;
 
+/** Conversation list, paged via `fetchNextPage` — `params.page` is ignored (internal page cursor instead). */
 export function useAdminChatConversations(params: AdminChatConversationsParams = {}) {
-  return useQuery({
-    queryKey: queryKeys.adminChat.conversations(params),
-    queryFn: () => adminChatService.getConversations(params),
+  const { unreadOnly, search, pageSize } = params;
+  const filters = { unreadOnly, search, pageSize };
+  return useInfiniteQuery({
+    queryKey: queryKeys.adminChat.conversations(filters),
+    queryFn: ({ pageParam }) => adminChatService.getConversations({ ...filters, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.pagination.page < lastPage.pagination.totalPages ? lastPage.pagination.page + 1 : undefined,
   });
 }
 
@@ -32,13 +38,25 @@ export function useAdminChatConversation(id: string | null) {
   });
 }
 
+interface MessagesPageParam {
+  before: string;
+  beforeId: string;
+}
+
 export function useAdminChatMessages(id: string | null) {
   return useInfiniteQuery({
     queryKey: queryKeys.adminChat.messages(id ?? ""),
-    queryFn: ({ pageParam }) => adminChatService.getMessages(id as string, { before: pageParam, limit: MESSAGES_PAGE_SIZE }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasMore && lastPage.items.length > 0 ? lastPage.items[lastPage.items.length - 1].createdAt : undefined,
+    queryFn: ({ pageParam }) =>
+      adminChatService.getMessages(id as string, {
+        before: pageParam?.before,
+        beforeId: pageParam?.beforeId,
+        limit: MESSAGES_PAGE_SIZE,
+      }),
+    initialPageParam: undefined as MessagesPageParam | undefined,
+    getNextPageParam: (lastPage): MessagesPageParam | undefined => {
+      const oldest = lastPage.items[lastPage.items.length - 1];
+      return lastPage.hasMore && oldest ? { before: oldest.createdAt, beforeId: oldest.id } : undefined;
+    },
     enabled: !!id,
   });
 }

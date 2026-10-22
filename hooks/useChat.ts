@@ -34,14 +34,22 @@ export function useMyConversation() {
   });
 }
 
+interface MessagesPageParam {
+  before: string;
+  beforeId: string;
+}
+
 export function useMyMessages() {
   const { isAuthenticated } = useAuth();
   return useInfiniteQuery({
     queryKey: queryKeys.chat.messages(),
-    queryFn: ({ pageParam }) => chatService.getMyMessages({ before: pageParam, limit: MESSAGES_PAGE_SIZE }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasMore && lastPage.items.length > 0 ? lastPage.items[lastPage.items.length - 1].createdAt : undefined,
+    queryFn: ({ pageParam }) =>
+      chatService.getMyMessages({ before: pageParam?.before, beforeId: pageParam?.beforeId, limit: MESSAGES_PAGE_SIZE }),
+    initialPageParam: undefined as MessagesPageParam | undefined,
+    getNextPageParam: (lastPage): MessagesPageParam | undefined => {
+      const oldest = lastPage.items[lastPage.items.length - 1];
+      return lastPage.hasMore && oldest ? { before: oldest.createdAt, beforeId: oldest.id } : undefined;
+    },
     enabled: isAuthenticated,
   });
 }

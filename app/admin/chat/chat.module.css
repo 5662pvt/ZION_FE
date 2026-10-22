@@ -1,0 +1,46 @@
+.page {
+  height: calc(100vh - 96px);
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+@media (min-width: 640px) {
+  .page {
+    height: calc(100vh - 112px);
+  }
+}
+
+.listPane {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.conversationPane {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767.98px) {
+  .listPane,
+  .conversationPane,
+  .empty {
+    width: 100%;
+  }
+
+  .hiddenMobile {
+    display: none;
+  }
+}
